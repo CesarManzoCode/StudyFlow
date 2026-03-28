@@ -450,3 +450,106 @@ samp {
     padding: 1.4rem;
   }
 }
+
+/* =========================
+   TASK CARD
+========================= */
+
+.task-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.task-card__link {
+  display: block;
+  padding: 1rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.task-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.task-card__title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  max-width: 75%;
+}
+
+.task-card__meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.task-card__course {
+  opacity: 0.9;
+}
+
+.task-card__due {
+  color: var(--warning);
+}
+
+.task-card__due--none {
+  color: var(--muted);
+}
+
+/* =========================
+   PRIORITY BADGE
+========================= */
+
+.priority-badge {
+  font-size: 0.65rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--border);
+}
+
+/* colores */
+
+.priority-badge--critical {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.priority-badge--high {
+  color: var(--warning);
+  border-color: var(--warning);
+}
+
+.priority-badge--medium {
+  color: #ffd966;
+  border-color: #ffd966;
+}
+
+.priority-badge--low {
+  color: #4cd964;
+  border-color: #4cd964;
+}
+
+/* =========================
+   CARD EDGE PRIORITY (visual fuerte)
+========================= */
+
+.priority-critical {
+  border-left: 3px solid var(--danger);
+}
+
+.priority-high {
+  border-left: 3px solid var(--warning);
+}
+
+.priority-medium {
+  border-left: 3px solid #ffd966;
+}
+
+.priority-low {
+  border-left: 3px solid #4cd964;
+}

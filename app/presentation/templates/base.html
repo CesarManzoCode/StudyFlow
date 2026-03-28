@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <meta
+      name="description"
+      content="Local-first Moodle assistant for reviewing pending tasks and requesting AI help."
+    />
+    <title>{% block title %}{{ page_title }} · {{ app_name }}{% endblock %}</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='/css/app.css') }}"
+    />
+
+    <script
+      src="https://unpkg.com/htmx.org@2.0.4"
+      integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+      crossorigin="anonymous"
+      defer
+    ></script>
+
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="container app-header__inner">
+          <div class="app-brand">
+            <a
+              href="/"
+              class="app-brand__link"
+            >
+              <span class="app-brand__title">{{ app_name }}</span>
+            </a>
+            <p class="app-brand__subtitle">
+              Moodle task triage and on-demand AI help
+            </p>
+          </div>
+
+          <div class="app-header__meta">
+            <span class="status-badge status-badge--neutral">Local network app</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="app-main">
+        <div class="container">
+          {% block content %}{% endblock %}
+        </div>
+      </main>
+    </div>
+
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

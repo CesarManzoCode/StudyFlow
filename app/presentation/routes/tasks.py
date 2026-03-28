@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -12,6 +14,7 @@ from app.presentation.viewmodels.tasks import map_task_to_viewmodel
 
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
+logger = logging.getLogger(__name__)
 
 templates = Jinja2Templates(directory=str(get_settings().templates_dir))
 templates.env.globals["app_name"] = get_settings().app_name
@@ -116,10 +119,11 @@ async def generate_task_help(
         )
         return templates.TemplateResponse(request, "task_detail.html", context, status_code=502)
     except Exception as exc:
+        logger.exception("Unexpected AI help error", exc_info=exc)
         context = await _build_task_context(
             request,
             task_id,
             ai_form=form,
-            error=f"Unexpected AI help error: {exc!s}",
+            error="Unexpected AI help error. Please retry in a moment.",
         )
         return templates.TemplateResponse(request, "task_detail.html", context, status_code=500)

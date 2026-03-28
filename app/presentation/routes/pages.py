@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime
 
 from fastapi import APIRouter, Request
@@ -13,6 +14,7 @@ from app.presentation.viewmodels.tasks import map_task_list
 
 
 router = APIRouter(tags=["pages"])
+logger = logging.getLogger(__name__)
 
 templates = Jinja2Templates(directory=str(get_settings().templates_dir))
 templates.env.globals["app_name"] = get_settings().app_name
@@ -37,17 +39,16 @@ async def _build_dashboard_context(
         tasks = map_task_list(prioritized_tasks)
         last_sync = await container.task_repository.last_synced_at()
     except Exception as exc:
+        logger.exception("Could not load tasks for dashboard", exc_info=exc)
         if error is None:
-            error = f"Could not load tasks: {exc!s}"
+            error = "Could not load tasks. Please try syncing again."
 
     settings_vm = map_settings_to_viewmodel(
         moodle_base_url=container.settings.moodle_base_url,
         moodle_username=container.settings.moodle_username,
-        moodle_password=container.settings.moodle_password,
         moodle_headless=container.settings.moodle_headless,
         llm_provider=container.settings.llm_provider,
         llm_model=container.settings.llm_model,
-        llm_api_key=container.settings.llm_api_key,
         llm_base_url=container.settings.llm_base_url,
     )
 
@@ -86,9 +87,10 @@ async def sync_tasks(request: Request):
     try:
         await container.sync_tasks.execute(synced_at=datetime.now())
     except Exception as exc:
+        logger.exception("Task synchronization failed", exc_info=exc)
         context = await _build_dashboard_context(
             request,
-            error=f"Task synchronization failed: {exc!s}",
+            error="Task synchronization failed. Check your Moodle settings and try again.",
         )
         return templates.TemplateResponse(request, "dashboard.html", context, status_code=502)
 

@@ -57,8 +57,9 @@
           <input
             type="password"
             name="moodle_password"
-            value="{{ settings.moodle_password }}"
-            required
+            value=""
+            placeholder="Leave blank to keep current password"
+            autocomplete="current-password"
           />
         </label>
 
@@ -94,7 +95,9 @@
           <input
             type="password"
             name="llm_api_key"
-            value="{{ settings.llm_api_key }}"
+            value=""
+            placeholder="Leave blank to keep current API key"
+            autocomplete="off"
           />
         </label>
 

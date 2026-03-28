@@ -15,7 +15,7 @@ class SettingsForm(BaseModel):
 
     moodle_base_url: str
     moodle_username: str
-    moodle_password: str
+    moodle_password: str | None = None
     llm_provider: str
     llm_model: str
     llm_api_key: str | None = None
@@ -26,9 +26,9 @@ class SettingsForm(BaseModel):
         cls,
         moodle_base_url: Annotated[str, Form(...)],
         moodle_username: Annotated[str, Form(...)],
-        moodle_password: Annotated[str, Form(...)],
         llm_provider: Annotated[str, Form(...)],
         llm_model: Annotated[str, Form(...)],
+        moodle_password: Annotated[str | None, Form()] = None,
         llm_api_key: Annotated[str | None, Form()] = None,
         llm_base_url: Annotated[str | None, Form()] = None,
     ) -> "SettingsForm":
@@ -45,7 +45,7 @@ class SettingsForm(BaseModel):
         return cls(
             moodle_base_url=normalize(moodle_base_url) or "",
             moodle_username=normalize(moodle_username) or "",
-            moodle_password=normalize(moodle_password) or "",
+            moodle_password=normalize(moodle_password),
             llm_provider=normalize(llm_provider) or "",
             llm_model=normalize(llm_model) or "",
             llm_api_key=normalize(llm_api_key),

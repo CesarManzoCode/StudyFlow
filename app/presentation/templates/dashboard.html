@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} · {{ app_name }}{% endblock %}
+
+{% block content %}
+  <section class="page-section">
+    <div class="page-heading">
+      <div>
+        <p class="eyebrow">Dashboard</p>
+        <h1 class="page-title">Pending assignments overview</h1>
+        <p class="page-description">
+          Review your Moodle account, manually refresh pending work, and request
+          AI help only when you need it.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section dashboard-grid">
+    <article class="card card--compact">
+      <div class="card__header">
+        <div>
+          <p class="card__eyebrow">Connection</p>
+          <h2 class="card__title">Current configuration</h2>
+        </div>
+      </div>
+
+      <dl class="details-list">
+        <div class="details-list__row">
+          <dt>Moodle URL</dt>
+          <dd>{{ moodle_base_url }}</dd>
+        </div>
+        <div class="details-list__row">
+          <dt>Username</dt>
+          <dd>{{ moodle_username }}</dd>
+        </div>
+        <div class="details-list__row">
+          <dt>LLM provider</dt>
+          <dd>{{ llm_provider }}</dd>
+        </div>
+        <div class="details-list__row">
+          <dt>Model</dt>
+          <dd>{{ llm_model }}</dd>
+        </div>
+      </dl>
+    </article>
+
+    <article class="card card--compact">
+      <div class="card__header">
+        <div>
+          <p class="card__eyebrow">Sync</p>
+          <h2 class="card__title">Manual refresh</h2>
+        </div>
+      </div>
+
+      <p class="card__description">
+        Task synchronization only runs when you explicitly request it.
+      </p>
+
+      <div class="stack">
+        <button
+          type="button"
+          class="button button--primary"
+          disabled
+          aria-disabled="true"
+        >
+          Refresh tasks
+        </button>
+        <p class="helper-text">
+          The live synchronization action will be connected once the scraping
+          workflow is implemented.
+        </p>
+      </div>
+    </article>
+  </section>
+
+  <section class="page-section">
+    <article class="card">
+      <div class="card__header card__header--split">
+        <div>
+          <p class="card__eyebrow">Assignments</p>
+          <h2 class="card__title">Pending tasks</h2>
+        </div>
+        <span class="status-badge status-badge--neutral">Not synced yet</span>
+      </div>
+
+      <div class="empty-state">
+        <h3 class="empty-state__title">No tasks loaded yet</h3>
+        <p class="empty-state__description">
+          Use the refresh action to fetch pending assignments from Moodle and
+          sort them by urgency.
+        </p>
+      </div>
+    </article>
+  </section>
+
+  <section class="page-section">
+    <article class="card">
+      <div class="card__header">
+        <div>
+          <p class="card__eyebrow">AI help</p>
+          <h2 class="card__title">Task assistance workflow</h2>
+        </div>
+      </div>
+
+      <ol class="steps-list">
+        <li>Refresh your pending tasks from Moodle.</li>
+        <li>Select the assignment you want help with.</li>
+        <li>Request a clear checklist with actionable steps.</li>
+        <li>Follow the checklist and complete the task.</li>
+      </ol>
+    </article>
+  </section>
+{% endblock %}

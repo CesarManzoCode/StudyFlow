@@ -1,270 +1,547 @@
 # StudyFlow
 
-StudyFlow is a local web app that helps you turn Moodle assignments into a clear, manageable work plan.
+StudyFlow es una aplicación web local que te ayuda a convertir tareas de Moodle en un plan de trabajo claro y manejable.
 
-Instead of jumping between Moodle, due dates, task descriptions, and AI chat tools, StudyFlow puts everything into one simple flow:
+En lugar de estar saltando entre Moodle, fechas de entrega, descripciones de tareas y herramientas de chat con IA, StudyFlow pone todo en un flujo simple:
 
-1. sync your pending tasks from Moodle
-2. open a task
-3. ask for AI help
-4. get a structured checklist you can actually follow
+1. sincronizar tus tareas pendientes desde Moodle
+2. abrir una tarea
+3. pedir ayuda a la IA
+4. obtener una checklist estructurada que realmente puedas seguir
 
-This project is meant for end users who want less friction when organizing academic work, not for teams managing enterprise LMS integrations.
+Este proyecto está pensado para usuarios finales que quieren menos fricción al organizar trabajo académico, no para equipos que gestionan integraciones empresariales con LMS.
 
-## What Problem It Solves
+## Qué Problema Resuelve
 
-Moodle is useful, but in day-to-day use it often creates a very specific problem:
+Moodle es útil, pero en el uso diario suele crear un problema muy específico:
 
-- tasks are scattered across courses
-- deadlines are easy to miss
-- assignment descriptions are often long or unclear
-- you still have to manually translate "what Moodle says" into "what I should do next"
-- if you use AI separately, you have to copy and paste context every time
+- las tareas están dispersas entre cursos
+- es fácil perder de vista las fechas límite
+- las descripciones de actividades suelen ser largas o poco claras
+- todavía tienes que traducir manualmente "lo que dice Moodle" a "lo que debo hacer ahora"
+- si usas IA por separado, tienes que copiar y pegar contexto cada vez
 
-StudyFlow solves that by connecting directly to Moodle, listing your pending tasks, and generating task-specific help from the assignment itself.
+StudyFlow resuelve eso conectándose directamente con Moodle, listando tus tareas pendientes y generando ayuda específica para cada actividad a partir de la propia tarea.
 
-## Why Use StudyFlow
+## Por Qué Usar StudyFlow
 
-StudyFlow is useful if you want:
+StudyFlow es útil si quieres:
 
-- one place to see pending tasks
-- a faster way to understand what each assignment is asking for
-- a practical checklist instead of a vague AI answer
-- a local-first workflow where your configuration stays on your machine
-- a lightweight tool focused on student execution, not project management overhead
+- un solo lugar para ver tareas pendientes
+- una forma más rápida de entender qué está pidiendo cada actividad
+- una checklist práctica en lugar de una respuesta vaga de IA
+- un flujo local donde tu configuración se queda en tu propia máquina
+- una herramienta ligera enfocada en ejecutar tareas como estudiante, no en sobrecarga de gestión de proyectos
 
-## What You Can Do With It
+## Qué Puedes Hacer Con Él
 
-- load your pending Moodle assignments
-- review each task in a cleaner detail view
-- ask the AI for help on a specific assignment
-- get a response with:
-  - summary
-  - deliverable
-  - steps
-  - warnings
-  - questions to clarify
-  - final checklist
-- save your Moodle and AI provider settings from the browser
+- cargar tus tareas pendientes de Moodle
+- revisar cada tarea en una vista de detalle más limpia
+- pedir ayuda a la IA sobre una tarea específica
+- obtener una respuesta con:
+  - resumen
+  - entregable
+  - pasos
+  - advertencias
+  - preguntas por aclarar
+  - checklist final
+- guardar tu configuración de Moodle y del proveedor de IA desde el navegador
 
-## Who It Is For
+## Para Quién Es
 
-StudyFlow is designed for:
+StudyFlow está diseñado para:
 
-- students who actively use Moodle
-- people who struggle with turning assignment text into an action plan
-- users who want AI help without manually re-explaining the task every time
+- estudiantes que usan Moodle activamente
+- personas a las que les cuesta convertir el texto de una actividad en un plan de acción
+- usuarios que quieren ayuda de IA sin tener que volver a explicar la tarea manualmente cada vez
 
-It is especially useful when you have multiple pending assignments and want a more guided workflow than checking Moodle directly.
+Es especialmente útil cuando tienes varias actividades pendientes y quieres un flujo más guiado que simplemente revisar Moodle directamente.
 
-## Who It Is Not For
+## Para Quién No Es
 
-StudyFlow is probably not the right fit if:
+StudyFlow probablemente no es la mejor opción si:
 
-- you do not use Moodle
-- you want collaborative team features
-- you want calendar sync, reminders, or mobile notifications
-- you need a cloud dashboard shared across multiple users
-- you want AI to complete work for you instead of helping you understand and execute it
+- no usas Moodle
+- quieres funciones colaborativas para equipos
+- quieres sincronización con calendario, recordatorios o notificaciones móviles
+- necesitas un panel en la nube compartido entre varios usuarios
+- quieres que la IA haga el trabajo por ti en lugar de ayudarte a entenderlo y ejecutarlo
 
-## Main Idea
+## Idea Principal
 
-StudyFlow does not try to replace Moodle.
+StudyFlow no intenta reemplazar Moodle.
 
-It solves the gap between:
+Resuelve la distancia entre:
 
-- "the assignment exists in Moodle"
-- and
-- "I know exactly what to do next"
+- "la tarea existe en Moodle"
+- y
+- "sé exactamente qué hacer después"
 
-That is the core value of the program.
+Ese es el valor central del programa.
 
-## How It Works
+## Guía de Instalación
 
-StudyFlow follows a simple user flow:
+Esta sección está escrita para usuarios finales, no para desarrolladores.
 
-### 1. Open the app
+Si vas a instalar StudyFlow por primera vez, sigue los pasos exactamente en orden.
 
-Run:
+### Antes de Empezar
 
-```bash
+Necesitas:
+
+- una cuenta de Moodle
+- conexión a internet
+- Python instalado en tu computadora
+- Git instalado en tu computadora
+- una cuenta de proveedor de IA si quieres usar ayuda en la nube
+
+Si quieres una configuración de IA más local, puedes usar Ollama en lugar de un proveedor en la nube.
+
+## Instalación en Windows
+
+### 1. Instalar Python
+
+- Ve al sitio oficial de Python
+- Descarga Python 3.12 o una versión más nueva
+- Durante la instalación, asegúrate de marcar **Add Python to PATH**
+
+### 2. Instalar Git
+
+- Ve al sitio oficial de Git
+- Descarga e instala Git para Windows
+
+### 3. Clonar el proyecto
+
+Abre **Command Prompt** o **PowerShell** y ejecuta:
+
+```powershell
+git clone https://github.com/CesarManzoCode/StudyFlow.git
+cd StudyFlow
+```
+
+### 4. Crear el entorno local de Python
+
+Ejecuta:
+
+```powershell
+py -m venv .venv
+```
+
+### 5. Activar el entorno
+
+Ejecuta:
+
+```powershell
+.venv\Scripts\activate
+```
+
+Después de esto, tu terminal debería mostrar algo como `(.venv)` al inicio de la línea.
+
+### 6. Instalar las dependencias de la aplicación
+
+Ejecuta:
+
+```powershell
+pip install -e .
+```
+
+### 7. Instalar el navegador usado para sincronizar Moodle
+
+Ejecuta:
+
+```powershell
+playwright install chromium
+```
+
+Si `playwright` no es reconocido, ejecuta:
+
+```powershell
+.venv\Scripts\playwright install chromium
+```
+
+### 8. Crear tu archivo `.env`
+
+Ejecuta:
+
+```powershell
+copy .env.example .env
+```
+
+Esto crea tu archivo personal de configuración.
+
+### 9. Editar tu archivo `.env`
+
+Abre `.env` con Notepad o con otro editor de texto y llena tus valores reales:
+
+```env
+# --- Moodle ---
+MOODLE_BASE_URL=https://your-moodle-site.example
+MOODLE_USERNAME=your_username
+MOODLE_PASSWORD=your_password
+MOODLE_HEADLESS=true
+
+# --- LLM ---
+LLM_PROVIDER=openai
+LLM_MODEL=gpt-5.4-nano
+LLM_BASE_URL=
+LLM_API_KEY=your_api_key_here
+
+# --- App ---
+APP_HOST=127.0.0.1
+APP_PORT=8000
+DEBUG=false
+```
+
+Si usas Ollama en lugar de OpenAI, una configuración típica se ve así:
+
+```env
+LLM_PROVIDER=ollama
+LLM_MODEL=qwen3:latest
+LLM_BASE_URL=http://localhost:11434
+LLM_API_KEY=
+```
+
+### 10. Iniciar la aplicación
+
+Ejecuta:
+
+```powershell
 python scripts/run.py
 ```
 
-Then open:
+### 11. Abrir la aplicación en tu navegador
+
+Abre:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-### 2. Configure your account
+## Instalación en Linux
 
-Open the **Settings** page and fill in:
+### 1. Asegúrate de que Python y Git estén instalados
 
-- Moodle base URL
-- Moodle username
-- Moodle password
-- AI provider
-- model
-- API key or base URL, depending on the provider
+En muchos sistemas Linux ya vienen instalados.
 
-When you save settings, the app reloads its internal configuration automatically.
+Si no los tienes, instálalos con el gestor de paquetes de tu distribución.
 
-### 3. Sync your tasks
+Ejemplos:
 
-On the dashboard, click **Refresh tasks**.
+Ubuntu / Debian:
 
-StudyFlow will log into Moodle and load pending assignments into the dashboard.
+```bash
+sudo apt update
+sudo apt install git python3 python3-venv
+```
 
-### 4. Open a task
+Arch Linux:
 
-Click any task card to open the detail page.
+```bash
+sudo pacman -S git python
+```
 
-You will see:
+### 2. Clonar el proyecto
 
-- course name
-- task status
-- due date
-- task description
+Abre una terminal y ejecuta:
 
-### 5. Ask for AI help
+```bash
+git clone https://github.com/CesarManzoCode/StudyFlow.git
+cd StudyFlow
+```
 
-Inside the task page, optionally write a custom question like:
+### 3. Crear el entorno local de Python
 
-- "give me a short plan"
-- "explain what I need to deliver"
-- "break this into small steps"
-- "what should I clarify with the teacher?"
+Ejecuta:
 
-Then click **Generate checklist**.
+```bash
+python -m venv .venv
+```
 
-### 6. Use the checklist to work
+### 4. Activar el entorno
 
-The AI output is structured so you can move from confusion to execution quickly.
+Ejecuta:
 
-## Supported AI Providers
+```bash
+source .venv/bin/activate
+```
 
-StudyFlow supports:
+Después de esto, tu terminal debería mostrar algo como `(.venv)`.
+
+### 5. Instalar las dependencias de la aplicación
+
+Ejecuta:
+
+```bash
+pip install -e .
+```
+
+### 6. Instalar el navegador usado para sincronizar Moodle
+
+Ejecuta:
+
+```bash
+playwright install chromium
+```
+
+Si hace falta, también puedes ejecutar:
+
+```bash
+.venv/bin/playwright install chromium
+```
+
+### 7. Crear tu archivo `.env`
+
+Ejecuta:
+
+```bash
+cp .env.example .env
+```
+
+### 8. Editar tu archivo `.env`
+
+Abre `.env` en un editor de texto y reemplaza los valores de ejemplo con tus valores reales.
+
+Puedes usar:
+
+```bash
+nano .env
+```
+
+o
+
+```bash
+code .env
+```
+
+Si usas OpenAI, un `.env` típico se ve así:
+
+```env
+# --- Moodle ---
+MOODLE_BASE_URL=https://your-moodle-site.example
+MOODLE_USERNAME=your_username
+MOODLE_PASSWORD=your_password
+MOODLE_HEADLESS=true
+
+# --- LLM ---
+LLM_PROVIDER=openai
+LLM_MODEL=gpt-5.4-nano
+LLM_BASE_URL=
+LLM_API_KEY=your_api_key_here
+
+# --- App ---
+APP_HOST=127.0.0.1
+APP_PORT=8000
+DEBUG=false
+```
+
+Si usas Ollama:
+
+```env
+LLM_PROVIDER=ollama
+LLM_MODEL=qwen3:latest
+LLM_BASE_URL=http://localhost:11434
+LLM_API_KEY=
+```
+
+### 9. Iniciar la aplicación
+
+Ejecuta:
+
+```bash
+python scripts/run.py
+```
+
+### 10. Abrir la aplicación en tu navegador
+
+Abre:
+
+```text
+http://127.0.0.1:8000
+```
+
+## Primer Uso Después de la Instalación
+
+Una vez que la aplicación esté abierta:
+
+1. ve al dashboard
+2. haz clic en **Refresh tasks**
+3. espera a que termine la sincronización con Moodle
+4. haz clic en una de tus tareas
+5. pide ayuda a la IA si la necesitas
+
+## Uso Diario
+
+StudyFlow sigue un flujo simple para el uso cotidiano:
+
+### 1. Abrir la aplicación
+
+Inicia la aplicación con:
+
+```bash
+python scripts/run.py
+```
+
+Después abre:
+
+```text
+http://127.0.0.1:8000
+```
+
+### 2. Sincronizar tus tareas
+
+En el dashboard, haz clic en **Refresh tasks**.
+
+StudyFlow iniciará sesión en Moodle y cargará tus actividades pendientes en el dashboard.
+
+### 3. Abrir una tarea
+
+Haz clic en cualquier tarjeta de tarea para abrir la vista de detalle.
+
+Verás:
+
+- nombre del curso
+- estado de la tarea
+- fecha de entrega
+- descripción de la tarea
+
+### 4. Pedir ayuda a la IA
+
+Dentro de la página de la tarea, opcionalmente escribe una pregunta personalizada como:
+
+- "dame un plan corto"
+- "explícame qué tengo que entregar"
+- "divide esto en pasos pequeños"
+- "qué debería aclarar con el profesor?"
+
+Luego haz clic en **Generate checklist**.
+
+### 5. Usar la checklist para trabajar
+
+La salida de la IA está estructurada para que puedas pasar de la confusión a la ejecución rápidamente.
+
+## Proveedores de IA Compatibles
+
+StudyFlow soporta:
 
 - OpenAI
 - Groq
 - Ollama
 - Anthropic
 
-The exact model and credentials depend on the provider you choose.
+El modelo exacto y las credenciales dependen del proveedor que elijas.
 
-## Why This Is Better Than Using Moodle Alone
+## Por Qué Esto Es Mejor Que Usar Solo Moodle
 
-Moodle tells you what exists.
+Moodle te dice qué existe.
 
-StudyFlow helps you act on it.
+StudyFlow te ayuda a actuar sobre ello.
 
-The difference matters when:
+La diferencia importa cuando:
 
-- you are overloaded
-- several assignments are pending at once
-- task instructions are ambiguous
-- you want fast interpretation, not just storage
+- estás saturado
+- hay varias tareas pendientes al mismo tiempo
+- las instrucciones de la actividad son ambiguas
+- quieres interpretación rápida, no solo almacenamiento
 
-## Why This Is Better Than Using a Generic AI Chat Separately
+## Por Qué Esto Es Mejor Que Usar un Chat de IA Genérico por Separado
 
-With a normal AI chat, you usually have to:
+Con un chat de IA normal, normalmente tienes que:
 
-- open Moodle
-- copy the assignment text
-- paste it into an AI tool
-- explain the context
-- repeat that process for every task
+- abrir Moodle
+- copiar el texto de la actividad
+- pegarlo en una herramienta de IA
+- explicar el contexto
+- repetir ese proceso para cada tarea
 
-StudyFlow reduces that friction because the task context already comes from Moodle.
+StudyFlow reduce esa fricción porque el contexto de la tarea ya viene desde Moodle.
 
-## Tradeoffs
+## Compensaciones
 
-StudyFlow is intentionally simple, and that simplicity comes with tradeoffs.
+StudyFlow es intencionalmente simple, y esa simplicidad trae compensaciones.
 
-### Benefits of this approach
+### Beneficios de este enfoque
 
-- focused workflow
-- local configuration
-- very little setup inside the UI
-- works around a real student pain point
-- AI help is tied to a specific task, not a generic blank chat
+- flujo enfocado
+- configuración local
+- muy poca configuración dentro de la interfaz
+- resuelve un dolor real del estudiante
+- la ayuda de IA está ligada a una tarea específica, no a un chat vacío genérico
 
-### Limitations of this approach
+### Limitaciones de este enfoque
 
-- it depends on Moodle page structure
-- if Moodle changes its HTML, syncing may need adjustments
-- it is single-user and local-first
-- it does not replace your judgment about assignment requirements
-- AI responses can help interpret a task, but they can still be incomplete or wrong
+- depende de la estructura de páginas de Moodle
+- si Moodle cambia su HTML, la sincronización puede necesitar ajustes
+- es de usuario único y local-first
+- no reemplaza tu criterio sobre los requisitos de una actividad
+- las respuestas de IA pueden ayudar a interpretar una tarea, pero aún pueden estar incompletas o ser incorrectas
 
-## Important Expectations
+## Expectativas Importantes
 
-StudyFlow helps you understand and organize your work.
+StudyFlow te ayuda a entender y organizar tu trabajo.
 
-It does not guarantee that:
+No garantiza que:
 
-- Moodle task text is complete
-- the AI fully understands hidden teacher expectations
-- a generated checklist is enough without reading the original assignment
+- el texto de la tarea en Moodle esté completo
+- la IA entienda por completo expectativas ocultas del profesor
+- una checklist generada sea suficiente sin leer la actividad original
 
-The best way to use it is:
+La mejor forma de usarlo es:
 
-1. sync tasks
-2. read the task
-3. use the AI checklist to organize your approach
-4. verify important details in Moodle before submitting
+1. sincronizar tareas
+2. leer la actividad
+3. usar la checklist de IA para organizar tu enfoque
+4. verificar los detalles importantes en Moodle antes de entregar
 
-## Privacy and Local Use
+## Privacidad y Uso Local
 
-StudyFlow is designed as a local-first tool.
+StudyFlow está diseñado como una herramienta local-first.
 
-- your settings are stored locally on your machine
-- you access the app through your own browser
-- Moodle credentials are used so the app can log in and fetch your assignments
+- tu configuración se guarda localmente en tu máquina
+- accedes a la aplicación desde tu propio navegador
+- las credenciales de Moodle se usan para que la aplicación pueda iniciar sesión y obtener tus tareas
 
-If you use a cloud AI provider like OpenAI, Groq, or Anthropic, task content sent for AI help may leave your machine and be processed by that provider.
+Si usas un proveedor de IA en la nube como OpenAI, Groq o Anthropic, el contenido de la tarea enviado para pedir ayuda puede salir de tu máquina y ser procesado por ese proveedor.
 
-If you want a more local workflow, use Ollama with a local model.
+Si quieres un flujo más local, usa Ollama con un modelo local.
 
-## Best Use Cases
+## Mejores Casos de Uso
 
-StudyFlow works especially well for:
+StudyFlow funciona especialmente bien para:
 
-- weekly assignment review
-- planning before starting homework
-- clarifying deliverables
-- breaking large assignments into smaller actions
-- deciding what to do first when several tasks are pending
+- revisión semanal de actividades
+- planificación antes de empezar tarea
+- aclarar entregables
+- dividir actividades grandes en acciones más pequeñas
+- decidir qué hacer primero cuando varias tareas están pendientes
 
-## Example Daily Workflow
+## Ejemplo de Flujo Diario
 
-1. Open StudyFlow.
-2. Click **Refresh tasks**.
-3. Review the pending list.
-4. Open the most urgent task.
-5. Ask: "Give me a practical step-by-step plan."
-6. Follow the generated checklist while completing the assignment.
+1. Abre StudyFlow.
+2. Haz clic en **Refresh tasks**.
+3. Revisa la lista de pendientes.
+4. Abre la tarea más urgente.
+5. Pregunta: "Dame un plan práctico paso a paso."
+6. Sigue la checklist generada mientras completas la actividad.
 
-## If Something Does Not Work
+## Si Algo No Funciona
 
-The most common issues are:
+Los problemas más comunes son:
 
-- Moodle login credentials are incorrect
-- Playwright browsers are not installed
-- the selected AI provider is missing credentials
-- Moodle changed its page structure
+- las credenciales de Moodle son incorrectas
+- los navegadores de Playwright no están instalados
+- al proveedor de IA seleccionado le faltan credenciales
+- Moodle cambió su estructura de páginas
 
-If syncing works but AI help fails, the problem is usually provider configuration.
+Si la sincronización funciona pero la ayuda de IA falla, el problema normalmente es la configuración del proveedor.
 
-If the dashboard loads but tasks do not appear after refresh, the problem is usually Moodle access or scraping.
+Si el dashboard carga pero las tareas no aparecen después de refrescar, el problema normalmente es acceso a Moodle o scraping.
 
-## Final Summary
+## Resumen Final
 
-StudyFlow is not a general productivity suite.
+StudyFlow no es una suite general de productividad.
 
-It is a focused tool for one specific problem:
+Es una herramienta enfocada en un problema muy específico:
 
-turning Moodle assignments into an actionable plan with as little friction as possible.
+convertir tareas de Moodle en un plan accionable con la menor fricción posible.
 
-If your real problem is not "I need a place to store tasks," but "I need help understanding what to do next," that is exactly where StudyFlow is useful.
+Si tu problema real no es "necesito un lugar para guardar tareas", sino "necesito ayuda para entender qué hacer después", ahí es exactamente donde StudyFlow resulta útil.

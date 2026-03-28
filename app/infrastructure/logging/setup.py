@@ -1,0 +1,34 @@
+from __future__ import annotations
+
+import logging
+import sys
+
+
+def setup_logging(debug: bool = False) -> None:
+    """
+    Configure application-wide logging.
+
+    Args:
+        debug: Enables verbose logging when True.
+    """
+
+    level = logging.DEBUG if debug else logging.INFO
+
+    logging.basicConfig(
+        level=level,
+        format=(
+            "%(asctime)s | "
+            "%(levelname)-8s | "
+            "%(name)s | "
+            "%(message)s"
+        ),
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[
+            logging.StreamHandler(sys.stdout),
+        ],
+    )
+
+    # Reduce noise from third-party libraries
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("asyncio").setLevel(logging.WARNING)
+    logging.getLogger("playwright").setLevel(logging.WARNING)

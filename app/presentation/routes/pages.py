@@ -1,49 +1,49 @@
+from __future__ import annotations
+
+from datetime import datetime
+
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from app.config import get_settings
+from app.infrastructure.factories import build_app_container
 
-
-settings = get_settings()
-templates = Jinja2Templates(directory=str(settings.templates_dir))
 
 router = APIRouter(tags=["pages"])
 
+templates = Jinja2Templates(directory="app/presentation/templates")
+
+container = build_app_container()
+
 
 @router.get("/", response_class=HTMLResponse)
-async def home(request: Request) -> HTMLResponse:
+async def dashboard(request: Request):
     """
-    Render the main dashboard page.
+    Render main dashboard.
+    """
+    tasks = []
+    last_sync = None
 
-    At this stage the page is intentionally static from the server perspective.
-    Dynamic task synchronization and AI interactions will be added through
-    dedicated application use cases and route modules later.
-    """
-    context = {
-        "request": request,
-        "page_title": "Dashboard",
-        "app_name": settings.app_name,
-        "moodle_base_url": settings.moodle_base_url,
-        "moodle_username": settings.moodle_username,
-        "llm_provider": settings.llm_provider.value,
-        "llm_model": _resolve_active_model_name(),
-    }
+    try:
+        tasks = await container.list_tasks.execute(now=datetime.now())
+        last_sync = await container.task_repository.last_synced_at()
+    except Exception:
+        # Dashboard must never crash
+        # Fail silently and show empty state
+        pass
+
     return templates.TemplateResponse(
-        request=request,
-        name="dashboard.html",
-        context=context,
+        "dashboard.html",
+        {
+            "request": request,
+            "page_title": "Dashboard",
+            "tasks": tasks,
+            "last_sync": last_sync,
+
+            # config display (already used in template)
+            "moodle_base_url": container.moodle_client._base_url,
+            "moodle_username": container.moodle_client._username,
+            "llm_provider": container.llm_client.__class__.__name__,
+            "llm_model": getattr(container.llm_client, "_model", "unknown"),
+        },
     )
-
-
-def _resolve_active_model_name() -> str:
-    """
-    Resolve the configured model name for the currently selected LLM provider.
-    """
-    provider_to_model = {
-        "openai": settings.openai_model,
-        "groq": settings.groq_model,
-        "anthropic": settings.anthropic_model,
-        "ollama": settings.ollama_model,
-    }
-    return provider_to_model[settings.llm_provider.value]

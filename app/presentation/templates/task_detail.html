@@ -3,73 +3,110 @@
 {% block title %}{{ page_title }} · {{ app_name }}{% endblock %}
 
 {% block content %}
-  <section class="page-section">
-    <div class="page-heading">
-      <div>
-        <p class="eyebrow">Task</p>
-        <h1 class="page-title">{{ task.title }}</h1>
-        <p class="page-description">
-          Review assignment details and request AI help only when needed.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <section class="page-section">
-    <article class="card">
-      <div class="card__header">
+  {% if task %}
+    <section class="page-section">
+      <div class="page-heading">
         <div>
-          <p class="card__eyebrow">Details</p>
-          <h2 class="card__title">Assignment information</h2>
+          <p class="eyebrow">Task</p>
+          <h1 class="page-title">{{ task.title }}</h1>
+          <p class="page-description">
+            Review assignment details and request AI help only when needed.
+          </p>
         </div>
       </div>
+    </section>
 
-      <dl class="details-list">
-        <div class="details-list__row">
-          <dt>Course</dt>
-          <dd>{{ task.course_name }}</dd>
+    {% include "partials/alerts.html" %}
+
+    <section class="page-section">
+      <article class="card">
+        <div class="card__header">
+          <div>
+            <p class="card__eyebrow">Details</p>
+            <h2 class="card__title">Assignment information</h2>
+          </div>
         </div>
 
-        <div class="details-list__row">
-          <dt>Status</dt>
-          <dd>{{ task.status.value }}</dd>
+        <dl class="details-list">
+          <div class="details-list__row">
+            <dt>Course</dt>
+            <dd>{{ task.course_name }}</dd>
+          </div>
+
+          <div class="details-list__row">
+            <dt>Status</dt>
+            <dd>{{ task.status }}</dd>
+          </div>
+
+          <div class="details-list__row">
+            <dt>Due date</dt>
+            <dd>
+              {% if task.due_at %}
+                {{ task.due_at }}
+              {% else %}
+                Not defined
+              {% endif %}
+            </dd>
+          </div>
+
+          <div class="details-list__row">
+            <dt>Source</dt>
+            <dd>
+              <a href="{{ task.url }}" target="_blank" rel="noreferrer">
+                Open Moodle task
+              </a>
+            </dd>
+          </div>
+        </dl>
+      </article>
+    </section>
+
+    <section class="page-section">
+      <article class="card">
+        <div class="card__header">
+          <div>
+            <p class="card__eyebrow">Description</p>
+            <h2 class="card__title">Task instructions</h2>
+          </div>
         </div>
 
-        <div class="details-list__row">
-          <dt>Due date</dt>
-          <dd>
-            {% if task.due_at %}
-              {{ task.due_at }}
-            {% else %}
-              Not defined
-            {% endif %}
-          </dd>
+        <div class="card__description">
+          {% if task.description_text %}
+            {{ task.description_text }}
+          {% else %}
+            <p class="helper-text">No description available.</p>
+          {% endif %}
         </div>
-      </dl>
-    </article>
-  </section>
+      </article>
+    </section>
 
-  <section class="page-section">
-    <article class="card">
-      <div class="card__header">
+    <section class="page-section">
+      {% include "partials/ai_panel.html" %}
+    </section>
+  {% else %}
+    <section class="page-section">
+      <div class="page-heading">
         <div>
-          <p class="card__eyebrow">Description</p>
-          <h2 class="card__title">Task instructions</h2>
+          <p class="eyebrow">Task</p>
+          <h1 class="page-title">Task not found</h1>
+          <p class="page-description">
+            Synchronize tasks again and retry opening the assignment detail page.
+          </p>
         </div>
       </div>
+    </section>
 
-      <div class="card__description">
-        {% if task.description_text %}
-          {{ task.description_text }}
-        {% else %}
-          <p class="helper-text">No description available.</p>
-        {% endif %}
-      </div>
-    </article>
-  </section>
+    {% include "partials/alerts.html" %}
 
-  <section class="page-section">
-    {% include "partials/ai_panel.html" %}
-  </section>
-
+    <section class="page-section">
+      <article class="card">
+        <div class="empty-state">
+          <h2 class="empty-state__title">This task is not available right now</h2>
+          <p class="empty-state__description">
+            Return to the dashboard, refresh the task snapshot, and try again.
+          </p>
+        </div>
+      </article>
+    </section>
+  {% endif %}
 {% endblock %}

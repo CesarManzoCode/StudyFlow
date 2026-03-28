@@ -31,10 +31,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # -----------------------------------------------------
     # Dependency container
     # -----------------------------------------------------
-    container = build_app_container()
+    def rebuild_container():
+        get_settings.cache_clear()
+        refreshed_settings = get_settings()
+        setup_logging(debug=refreshed_settings.debug)
+        container = build_app_container(settings=refreshed_settings)
+        app.state.container = container
+        return container
 
-    # attach to app state (single source of truth)
-    app.state.container = container
+    app.state.rebuild_container = rebuild_container
+    app.state.container = build_app_container(settings=settings)
 
     # -----------------------------------------------------
     # Startup complete

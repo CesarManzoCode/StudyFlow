@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Annotated
+
+from fastapi import Form
+from pydantic import BaseModel, ConfigDict
 
 
 class SettingsForm(BaseModel):
@@ -10,28 +13,24 @@ class SettingsForm(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    # Moodle
-    moodle_base_url: str = Field(..., min_length=1)
-    moodle_username: str = Field(..., min_length=1)
-    moodle_password: str = Field(..., min_length=1)
-
-    # LLM
-    llm_provider: str = Field(..., min_length=1)
-    llm_model: str = Field(..., min_length=1)
-
-    llm_api_key: str | None = Field(default=None)
-    llm_base_url: str | None = Field(default=None)
+    moodle_base_url: str
+    moodle_username: str
+    moodle_password: str
+    llm_provider: str
+    llm_model: str
+    llm_api_key: str | None = None
+    llm_base_url: str | None = None
 
     @classmethod
     def from_form(
         cls,
-        moodle_base_url: str,
-        moodle_username: str,
-        moodle_password: str,
-        llm_provider: str,
-        llm_model: str,
-        llm_api_key: str | None = None,
-        llm_base_url: str | None = None,
+        moodle_base_url: Annotated[str, Form(...)],
+        moodle_username: Annotated[str, Form(...)],
+        moodle_password: Annotated[str, Form(...)],
+        llm_provider: Annotated[str, Form(...)],
+        llm_model: Annotated[str, Form(...)],
+        llm_api_key: Annotated[str | None, Form()] = None,
+        llm_base_url: Annotated[str | None, Form()] = None,
     ) -> "SettingsForm":
         """
         Factory method to adapt FastAPI form input.

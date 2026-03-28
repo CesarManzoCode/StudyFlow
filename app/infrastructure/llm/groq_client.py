@@ -96,7 +96,7 @@ class GroqClient(LlmClient):
                         "type": "json_schema",
                         "name": "checklist_payload",
                         "strict": True,
-                        "schema": ChecklistPayload.model_json_schema(),
+                        "schema": ChecklistPayload.openai_response_schema(),
                     }
                 },
             )

@@ -16,6 +16,8 @@
     </div>
   </section>
 
+  {% include "partials/alerts.html" %}
+
   <section class="page-section dashboard-grid">
     <article class="card card--compact">
       <div class="card__header">
@@ -28,19 +30,19 @@
       <dl class="details-list">
         <div class="details-list__row">
           <dt>Moodle URL</dt>
-          <dd>{{ moodle_base_url }}</dd>
+          <dd>{{ settings.moodle_base_url }}</dd>
         </div>
         <div class="details-list__row">
           <dt>Username</dt>
-          <dd>{{ moodle_username }}</dd>
+          <dd>{{ settings.moodle_username }}</dd>
         </div>
         <div class="details-list__row">
           <dt>LLM provider</dt>
-          <dd>{{ llm_provider }}</dd>
+          <dd>{{ settings.llm_provider }}</dd>
         </div>
         <div class="details-list__row">
           <dt>Model</dt>
-          <dd>{{ llm_model }}</dd>
+          <dd>{{ settings.llm_model }}</dd>
         </div>
       </dl>
     </article>
@@ -57,20 +59,22 @@
         Task synchronization only runs when you explicitly request it.
       </p>
 
-      <div class="stack">
+      <form
+        method="post"
+        action="/sync"
+        class="stack"
+      >
         <button
-          type="button"
+          type="submit"
           class="button button--primary"
-          disabled
-          aria-disabled="true"
         >
           Refresh tasks
         </button>
         <p class="helper-text">
-          The live synchronization action will be connected once the scraping
-          workflow is implemented.
+          Use demo mode immediately or save real credentials in Settings to pull
+          a live Moodle snapshot.
         </p>
-      </div>
+      </form>
     </article>
   </section>
 
@@ -81,16 +85,16 @@
           <p class="card__eyebrow">Assignments</p>
           <h2 class="card__title">Pending tasks</h2>
         </div>
-        <span class="status-badge status-badge--neutral">Not synced yet</span>
+        <span class="status-badge status-badge--neutral">
+          {% if last_sync_display %}
+            Last sync {{ last_sync_display }}
+          {% else %}
+            Not synced yet
+          {% endif %}
+        </span>
       </div>
 
-      <div class="empty-state">
-        <h3 class="empty-state__title">No tasks loaded yet</h3>
-        <p class="empty-state__description">
-          Use the refresh action to fetch pending assignments from Moodle and
-          sort them by urgency.
-        </p>
-      </div>
+      {% include "partials/task_list.html" %}
     </article>
   </section>
 

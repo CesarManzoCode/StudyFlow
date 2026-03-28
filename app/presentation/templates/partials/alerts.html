@@ -1,0 +1,23 @@
+{% if success %}
+  <section class="page-section">
+    <article class="card">
+      <p class="card__description"><strong>Success:</strong> {{ success }}</p>
+    </article>
+  </section>
+{% endif %}
+
+{% if error %}
+  <section class="page-section">
+    <article class="card">
+      <p class="card__description"><strong>Error:</strong> {{ error }}</p>
+    </article>
+  </section>
+{% endif %}
+
+{% if info %}
+  <section class="page-section">
+    <article class="card">
+      <p class="card__description"><strong>Info:</strong> {{ info }}</p>
+    </article>
+  </section>
+{% endif %}

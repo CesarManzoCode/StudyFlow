@@ -11,7 +11,10 @@ class ChecklistPayload(BaseModel):
     converting it into the domain-level ChecklistResponse.
     """
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        extra="forbid",
+    )
 
     summary: str = Field(..., min_length=1)
     deliverable: str = Field(..., min_length=1)
@@ -66,3 +69,17 @@ class ChecklistPayload(BaseModel):
             questions_to_clarify=self.questions_to_clarify,
             final_checklist=self.final_checklist,
         )
+
+    @classmethod
+    def openai_response_schema(cls) -> dict[str, object]:
+        """
+        Return a strict JSON schema compatible with OpenAI structured outputs.
+        """
+        schema = cls.model_json_schema()
+        properties = schema.get("properties")
+
+        if isinstance(properties, dict):
+            schema["required"] = list(properties.keys())
+
+        schema["additionalProperties"] = False
+        return schema

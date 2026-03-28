@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Annotated
+
+from fastapi import Form
+from pydantic import BaseModel, ConfigDict
 
 
 class AiHelpForm(BaseModel):
@@ -10,14 +13,13 @@ class AiHelpForm(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    user_question: str | None = Field(
-        default=None,
-        max_length=1000,
-        description="Optional user refinement for the AI prompt.",
-    )
+    user_question: str | None = None
 
     @classmethod
-    def from_form(cls, user_question: str | None = None) -> "AiHelpForm":
+    def from_form(
+        cls,
+        user_question: Annotated[str | None, Form()] = None,
+    ) -> "AiHelpForm":
         """
         Factory method to adapt FastAPI form input.
         """

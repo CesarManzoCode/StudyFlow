@@ -1,23 +1,50 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from app.application.use_cases.save_settings import SaveSettingsUseCase
-from app.application.use_cases.validate_provider import ValidateProviderUseCase
+from app.config import get_settings
 from app.domain.exceptions import InvalidLlmResponseError
-from app.infrastructure.config.settings import get_settings
+from app.infrastructure.factories import AppContainer
+from app.presentation.forms.settings_form import SettingsForm
+from app.presentation.viewmodels.settings import map_settings_to_viewmodel
 
 
 router = APIRouter(prefix="/settings", tags=["settings"])
 
-templates = Jinja2Templates(directory="app/presentation/templates")
+templates = Jinja2Templates(directory=str(get_settings().templates_dir))
+templates.env.globals["app_name"] = get_settings().app_name
 
-settings = get_settings()
 
-save_settings_uc = SaveSettingsUseCase()
-validate_provider_uc = ValidateProviderUseCase()
+def _get_container(request: Request) -> AppContainer:
+    return request.app.state.container
+
+
+def _map_container_settings(container: AppContainer):
+    return map_settings_to_viewmodel(
+        moodle_base_url=container.settings.moodle_base_url,
+        moodle_username=container.settings.moodle_username,
+        moodle_password=container.settings.moodle_password,
+        moodle_headless=container.settings.moodle_headless,
+        llm_provider=container.settings.llm_provider,
+        llm_model=container.settings.llm_model,
+        llm_api_key=container.settings.llm_api_key,
+        llm_base_url=container.settings.llm_base_url,
+    )
+
+
+def _map_form_settings(form: SettingsForm):
+    return map_settings_to_viewmodel(
+        moodle_base_url=form.moodle_base_url,
+        moodle_username=form.moodle_username,
+        moodle_password=form.moodle_password,
+        moodle_headless=True,
+        llm_provider=form.llm_provider,
+        llm_model=form.llm_model,
+        llm_api_key=form.llm_api_key,
+        llm_base_url=form.llm_base_url,
+    )
 
 
 @router.get("", response_class=HTMLResponse)
@@ -25,13 +52,21 @@ async def settings_page(request: Request):
     """
     Render settings page.
     """
+    container = _get_container(request)
     return templates.TemplateResponse(
+        request,
         "settings.html",
         {
             "request": request,
             "page_title": "Settings",
-            "settings": settings,
+            "settings": _map_container_settings(container),
+            "success": (
+                "Settings saved and container reloaded."
+                if request.query_params.get("saved") == "1"
+                else None
+            ),
             "error": None,
+            "info": None,
         },
     )
 
@@ -39,58 +74,60 @@ async def settings_page(request: Request):
 @router.post("", response_class=HTMLResponse)
 async def save_settings(
     request: Request,
-    moodle_base_url: str = Form(...),
-    moodle_username: str = Form(...),
-    moodle_password: str = Form(...),
-    llm_provider: str = Form(...),
-    llm_model: str = Form(...),
-    llm_api_key: str = Form(default=""),
-    llm_base_url: str = Form(default=""),
+    form: SettingsForm = Depends(SettingsForm.from_form),
 ):
     """
     Save settings and validate LLM provider.
     """
+    container = _get_container(request)
+
     try:
-        # validar provider primero
-        await validate_provider_uc.execute(
-            provider=llm_provider,
-            api_key=llm_api_key or None,
-            base_url=llm_base_url or None,
+        await container.validate_provider.execute(
+            provider=form.llm_provider,
+            model=form.llm_model,
+            api_key=form.llm_api_key,
+            base_url=form.llm_base_url,
         )
 
-        # guardar configuración
-        await save_settings_uc.execute(
-            moodle_base_url=moodle_base_url,
-            moodle_username=moodle_username,
-            moodle_password=moodle_password,
-            llm_provider=llm_provider,
-            llm_model=llm_model,
-            llm_api_key=llm_api_key or None,
-            llm_base_url=llm_base_url or None,
+        await container.save_settings.execute(
+            moodle_base_url=form.moodle_base_url,
+            moodle_username=form.moodle_username,
+            moodle_password=form.moodle_password,
+            llm_provider=form.llm_provider,
+            llm_model=form.llm_model,
+            llm_api_key=form.llm_api_key,
+            llm_base_url=form.llm_base_url,
         )
+        request.app.state.rebuild_container()
 
-        return RedirectResponse("/settings", status_code=303)
+        return RedirectResponse("/settings?saved=1", status_code=303)
 
     except InvalidLlmResponseError as exc:
         return templates.TemplateResponse(
+            request,
             "settings.html",
             {
                 "request": request,
                 "page_title": "Settings",
-                "settings": settings,
+                "settings": _map_form_settings(form),
+                "success": None,
                 "error": str(exc),
+                "info": None,
             },
             status_code=400,
         )
 
     except Exception as exc:
         return templates.TemplateResponse(
+            request,
             "settings.html",
             {
                 "request": request,
                 "page_title": "Settings",
-                "settings": settings,
+                "settings": _map_form_settings(form),
+                "success": None,
                 "error": f"Unexpected error: {exc!s}",
+                "info": None,
             },
             status_code=500,
         )

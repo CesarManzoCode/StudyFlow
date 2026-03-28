@@ -1,95 +1,103 @@
-<article class="card">
-  <div class="card__header">
-    <div>
-      <p class="card__eyebrow">AI help</p>
-      <h2 class="card__title">Request task assistance</h2>
+{% if task %}
+  <article class="card">
+    <div class="card__header">
+      <div>
+        <p class="card__eyebrow">AI help</p>
+        <h2 class="card__title">Request task assistance</h2>
+      </div>
     </div>
-  </div>
 
-  <form
-    method="post"
-    action="/tasks/{{ task.id }}/help"
-    class="stack"
-  >
-    <textarea
-      name="user_question"
-      placeholder="Optional: ask something specific (e.g., 'give me step-by-step instructions')"
-    ></textarea>
-
-    <button
-      type="submit"
-      class="button button--primary"
+    <form
+      method="post"
+      action="/tasks/{{ task.id }}/help"
+      class="stack"
     >
-      Generate checklist
-    </button>
+      <textarea
+        name="user_question"
+        placeholder="Optional: ask something specific (e.g., 'give me step-by-step instructions')"
+      >{{ ai_form.user_question if ai_form and ai_form.user_question else "" }}</textarea>
 
-    <p class="helper-text">
-      The AI will analyze the task and generate a clear, actionable checklist.
-    </p>
-  </form>
+      <button
+        type="submit"
+        class="button button--primary"
+      >
+        Generate checklist
+      </button>
 
-  {% if checklist %}
-    <div class="card" style="margin-top: 1rem;">
-      <div class="card__header">
-        <div>
-          <p class="card__eyebrow">Result</p>
-          <h2 class="card__title">AI-generated checklist</h2>
+      <p class="helper-text">
+        The AI will analyze the task and generate a clear, actionable checklist.
+      </p>
+    </form>
+
+    {% if checklist %}
+      <div class="card" style="margin-top: 1rem;">
+        <div class="card__header">
+          <div>
+            <p class="card__eyebrow">Result</p>
+            <h2 class="card__title">AI-generated checklist</h2>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div>
+            <h3>Summary</h3>
+            <p>{{ checklist.summary }}</p>
+          </div>
+
+          <div>
+            <h3>Deliverable</h3>
+            <p>{{ checklist.deliverable }}</p>
+          </div>
+
+          <div>
+            <h3>Steps</h3>
+            {% if checklist.steps %}
+              <ul>
+                {% for step in checklist.steps %}
+                  <li>{{ step }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="helper-text">No step list was generated.</p>
+            {% endif %}
+          </div>
+
+          {% if checklist.warnings %}
+            <div>
+              <h3>Warnings</h3>
+              <ul>
+                {% for w in checklist.warnings %}
+                  <li>{{ w }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          {% if checklist.questions_to_clarify %}
+            <div>
+              <h3>Questions to clarify</h3>
+              <ul>
+                {% for q in checklist.questions_to_clarify %}
+                  <li>{{ q }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          <div>
+            <h3>Final checklist</h3>
+            {% if checklist.final_checklist %}
+              <ul>
+                {% for item in checklist.final_checklist %}
+                  <li>✔ {{ item }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="helper-text">No final checklist items were generated.</p>
+            {% endif %}
+          </div>
         </div>
       </div>
-
-      <div class="stack">
-
-        <div>
-          <h3>Summary</h3>
-          <p>{{ checklist.summary }}</p>
-        </div>
-
-        <div>
-          <h3>Deliverable</h3>
-          <p>{{ checklist.deliverable }}</p>
-        </div>
-
-        <div>
-          <h3>Steps</h3>
-          <ul>
-            {% for step in checklist.steps %}
-              <li>{{ step }}</li>
-            {% endfor %}
-          </ul>
-        </div>
-
-        {% if checklist.warnings %}
-          <div>
-            <h3>Warnings</h3>
-            <ul>
-              {% for w in checklist.warnings %}
-                <li>{{ w }}</li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% endif %}
-
-        {% if checklist.questions_to_clarify %}
-          <div>
-            <h3>Questions to clarify</h3>
-            <ul>
-              {% for q in checklist.questions_to_clarify %}
-                <li>{{ q }}</li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% endif %}
-
-        <div>
-          <h3>Final checklist</h3>
-          <ul>
-            {% for item in checklist.final_checklist %}
-              <li>✔ {{ item }}</li>
-            {% endfor %}
-          </ul>
-        </div>
-
-      </div>
-    </div>
-  {% endif %}
-</article>
+    {% endif %}
+  </article>
+{% endif %}

@@ -7,7 +7,7 @@ name = "moodle-ai-assistant"
 version = "0.1.0"
 description = "Local-first Moodle assistant with task prioritization and on-demand AI help."
 readme = "README.md"
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.12,<3.15"
 license = { text = "MIT" }
 authors = [
   { name = "Cesar Manzo" }

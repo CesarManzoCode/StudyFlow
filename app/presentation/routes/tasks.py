@@ -1,20 +1,62 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from app.domain.exceptions import TaskNotFoundError
-from app.infrastructure.factories import build_app_container
+from app.config import get_settings
+from app.domain.exceptions import InvalidLlmResponseError, LlmProviderError, TaskNotFoundError
+from app.infrastructure.factories import AppContainer
+from app.presentation.forms.ai_help_form import AiHelpForm
+from app.presentation.viewmodels.tasks import map_task_to_viewmodel
 
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
-templates = Jinja2Templates(directory="app/presentation/templates")
+templates = Jinja2Templates(directory=str(get_settings().templates_dir))
+templates.env.globals["app_name"] = get_settings().app_name
 
-# ⚠️ IMPORTANTE: no recrear múltiples veces en producción real,
-# pero para este proyecto local es aceptable.
-container = build_app_container()
+
+def _get_container(request: Request) -> AppContainer:
+    return request.app.state.container
+
+
+async def _build_task_context(
+    request: Request,
+    task_id: str,
+    *,
+    checklist=None,
+    ai_form: AiHelpForm | None = None,
+    success: str | None = None,
+    error: str | None = None,
+) -> dict[str, object]:
+    container = _get_container(request)
+    task = await container.get_task_detail.execute(task_id)
+    task_view_model = map_task_to_viewmodel(task)
+
+    return {
+        "request": request,
+        "page_title": task_view_model.title,
+        "task": task_view_model,
+        "checklist": checklist,
+        "ai_form": ai_form or AiHelpForm(),
+        "success": success,
+        "error": error,
+        "info": None,
+    }
+
+
+def _not_found_context(request: Request, *, error: str | None = None) -> dict[str, object]:
+    return {
+        "request": request,
+        "page_title": "Task not found",
+        "task": None,
+        "checklist": None,
+        "ai_form": AiHelpForm(),
+        "success": None,
+        "error": error or "The requested task is not available in the current snapshot.",
+        "info": None,
+    }
 
 
 @router.get("/{task_id}", response_class=HTMLResponse)
@@ -23,27 +65,13 @@ async def task_detail(request: Request, task_id: str):
     Render task detail page.
     """
     try:
-        task = await container.get_task_detail.execute(task_id)
-
-        return templates.TemplateResponse(
-            "task_detail.html",
-            {
-                "request": request,
-                "page_title": task.title,
-                "task": task,
-                "checklist": None,
-            },
-        )
-
+        context = await _build_task_context(request, task_id)
+        return templates.TemplateResponse(request, "task_detail.html", context)
     except TaskNotFoundError:
         return templates.TemplateResponse(
+            request,
             "task_detail.html",
-            {
-                "request": request,
-                "page_title": "Task not found",
-                "task": None,
-                "checklist": None,
-            },
+            _not_found_context(request),
             status_code=404,
         )
 
@@ -52,37 +80,46 @@ async def task_detail(request: Request, task_id: str):
 async def generate_task_help(
     request: Request,
     task_id: str,
-    user_question: str = Form(default=""),
+    form: AiHelpForm = Depends(AiHelpForm.from_form),
 ):
     """
     Generate AI checklist for a task.
     """
+    container = _get_container(request)
+
     try:
         checklist = await container.generate_task_help.execute(
             task_id=task_id,
-            user_question=user_question or None,
+            user_question=form.user_question,
         )
-
-        task = await container.get_task_detail.execute(task_id)
-
-        return templates.TemplateResponse(
-            "task_detail.html",
-            {
-                "request": request,
-                "page_title": task.title,
-                "task": task,
-                "checklist": checklist,
-            },
+        context = await _build_task_context(
+            request,
+            task_id,
+            checklist=checklist,
+            ai_form=form,
+            success="AI checklist generated successfully.",
         )
-
+        return templates.TemplateResponse(request, "task_detail.html", context)
     except TaskNotFoundError:
         return templates.TemplateResponse(
+            request,
             "task_detail.html",
-            {
-                "request": request,
-                "page_title": "Task not found",
-                "task": None,
-                "checklist": None,
-            },
+            _not_found_context(request),
             status_code=404,
         )
+    except (InvalidLlmResponseError, LlmProviderError) as exc:
+        context = await _build_task_context(
+            request,
+            task_id,
+            ai_form=form,
+            error=f"Could not generate AI help: {exc!s}",
+        )
+        return templates.TemplateResponse(request, "task_detail.html", context, status_code=502)
+    except Exception as exc:
+        context = await _build_task_context(
+            request,
+            task_id,
+            ai_form=form,
+            error=f"Unexpected AI help error: {exc!s}",
+        )
+        return templates.TemplateResponse(request, "task_detail.html", context, status_code=500)

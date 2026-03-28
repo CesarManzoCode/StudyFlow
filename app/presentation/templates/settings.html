@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} · {{ app_name }}{% endblock %}
+
+{% block content %}
+  <section class="page-section">
+    <div class="page-heading">
+      <div>
+        <p class="eyebrow">Settings</p>
+        <h1 class="page-title">Connection and provider setup</h1>
+        <p class="page-description">
+          Save live Moodle and LLM credentials here. The application container is
+          rebuilt automatically after each successful save.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {% include "partials/alerts.html" %}
+
+  <section class="page-section dashboard-grid">
+    <article class="card">
+      <div class="card__header">
+        <div>
+          <p class="card__eyebrow">Edit</p>
+          <h2 class="card__title">Application settings</h2>
+        </div>
+      </div>
+
+      <form
+        method="post"
+        action="/settings"
+        class="stack"
+      >
+        <label class="stack">
+          <span>Moodle base URL</span>
+          <input
+            type="url"
+            name="moodle_base_url"
+            value="{{ settings.moodle_base_url }}"
+            required
+          />
+        </label>
+
+        <label class="stack">
+          <span>Moodle username</span>
+          <input
+            type="text"
+            name="moodle_username"
+            value="{{ settings.moodle_username }}"
+            required
+          />
+        </label>
+
+        <label class="stack">
+          <span>Moodle password</span>
+          <input
+            type="password"
+            name="moodle_password"
+            value="{{ settings.moodle_password }}"
+            required
+          />
+        </label>
+
+        <label class="stack">
+          <span>LLM provider</span>
+          <select
+            name="llm_provider"
+            required
+          >
+            {% for provider in ["ollama", "openai", "groq", "anthropic"] %}
+              <option
+                value="{{ provider }}"
+                {% if settings.llm_provider == provider %}selected{% endif %}
+              >
+                {{ provider }}
+              </option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label class="stack">
+          <span>LLM model</span>
+          <input
+            type="text"
+            name="llm_model"
+            value="{{ settings.llm_model }}"
+            required
+          />
+        </label>
+
+        <label class="stack">
+          <span>LLM API key</span>
+          <input
+            type="password"
+            name="llm_api_key"
+            value="{{ settings.llm_api_key }}"
+          />
+        </label>
+
+        <label class="stack">
+          <span>LLM base URL</span>
+          <input
+            type="url"
+            name="llm_base_url"
+            value="{{ settings.llm_base_url }}"
+          />
+        </label>
+
+        <button
+          type="submit"
+          class="button button--primary"
+        >
+          Save settings
+        </button>
+      </form>
+    </article>
+
+    <article class="card card--compact">
+      <div class="card__header">
+        <div>
+          <p class="card__eyebrow">Current</p>
+          <h2 class="card__title">Saved configuration snapshot</h2>
+        </div>
+      </div>
+
+      <dl class="details-list">
+        <div class="details-list__row">
+          <dt>Moodle URL</dt>
+          <dd>{{ settings.moodle_base_url }}</dd>
+        </div>
+        <div class="details-list__row">
+          <dt>Username</dt>
+          <dd>{{ settings.moodle_username }}</dd>
+        </div>
+        <div class="details-list__row">
+          <dt>Headless</dt>
+          <dd>{{ settings.moodle_headless }}</dd>
+        </div>
+        <div class="details-list__row">
+          <dt>Provider</dt>
+          <dd>{{ settings.llm_provider }}</dd>
+        </div>
+        <div class="details-list__row">
+          <dt>Model</dt>
+          <dd>{{ settings.llm_model }}</dd>
+        </div>
+      </dl>
+    </article>
+  </section>
+{% endblock %}

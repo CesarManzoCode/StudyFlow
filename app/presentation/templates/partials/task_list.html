@@ -1,0 +1,15 @@
+{% if tasks %}
+  <div class="stack">
+    {% for task in tasks %}
+      {% include "partials/task_card.html" %}
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state">
+    <h3 class="empty-state__title">No tasks loaded yet</h3>
+    <p class="empty-state__description">
+      Use the refresh action to fetch pending assignments from Moodle and sort
+      them by urgency.
+    </p>
+  </div>
+{% endif %}

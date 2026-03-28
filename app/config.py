@@ -1,8 +1,8 @@
-from enum import StrEnum
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,19 +12,13 @@ STATIC_DIR = APP_DIR / "static"
 TEMPLATES_DIR = APP_DIR / "presentation" / "templates"
 
 
-class LlmProvider(StrEnum):
-    OPENAI = "openai"
-    GROQ = "groq"
-    ANTHROPIC = "anthropic"
-    OLLAMA = "ollama"
-
-
 class Settings(BaseSettings):
     """
-    Application settings loaded from environment variables and .env files.
+    Unified application settings.
 
-    The project is intentionally single-user and local-first, so settings are
-    modeled as one coherent configuration object rather than fragmented modules.
+    The project persists configuration in a local `.env` file, but the app
+    also ships with safe demo defaults so it can boot cleanly on a fresh clone
+    before the user configures real Moodle or LLM credentials.
     """
 
     model_config = SettingsConfigDict(
@@ -34,32 +28,22 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_name: str = "Moodle AI Assistant"
+    app_name: str = "StudyFlow"
     debug: bool = False
 
-    app_host: str = "0.0.0.0"
+    app_host: str = "127.0.0.1"
     app_port: int = 8000
-    app_access_key: SecretStr | None = None
-
     static_url_path: str = "/static"
 
-    moodle_base_url: str = Field(..., description="Base URL of the Moodle instance.")
-    moodle_username: str = Field(..., min_length=1)
-    moodle_password: SecretStr = Field(...)
+    moodle_base_url: str = "https://example.edu/moodle"
+    moodle_username: str = "demo.student"
+    moodle_password: str = "demo-password"
+    moodle_headless: bool = True
 
-    llm_provider: LlmProvider = LlmProvider.OPENAI
-
-    openai_api_key: SecretStr | None = None
-    openai_model: str = "gpt-5.4-mini"
-
-    groq_api_key: SecretStr | None = None
-    groq_model: str = "llama-3.3-70b-versatile"
-
-    anthropic_api_key: SecretStr | None = None
-    anthropic_model: str = "claude-sonnet-4-5"
-
-    ollama_base_url: str = "http://localhost:11434"
-    ollama_model: str = "qwen3:latest"
+    llm_provider: Literal["ollama", "openai", "groq", "anthropic"] = "ollama"
+    llm_model: str = "demo-checklist"
+    llm_base_url: str | None = "http://localhost:11434"
+    llm_api_key: str | None = None
 
     @property
     def static_dir(self) -> Path:
@@ -72,8 +56,17 @@ class Settings(BaseSettings):
     @field_validator("moodle_base_url", mode="before")
     @classmethod
     def normalize_moodle_base_url(cls, value: str) -> str:
-        normalized = value.strip()
+        normalized = str(value).strip()
         return normalized.rstrip("/")
+
+    @field_validator("moodle_username", "moodle_password", "llm_model", mode="before")
+    @classmethod
+    def normalize_required_text(cls, value: str) -> str:
+        normalized = str(value).strip()
+        if not normalized:
+            msg = "Configuration values must not be empty."
+            raise ValueError(msg)
+        return normalized
 
     @field_validator("app_host")
     @classmethod
@@ -93,11 +86,38 @@ class Settings(BaseSettings):
             raise ValueError(msg)
         return normalized.rstrip("/") or "/static"
 
-    @field_validator("ollama_base_url", mode="before")
+    @field_validator("llm_base_url", mode="before")
     @classmethod
-    def normalize_ollama_base_url(cls, value: str) -> str:
+    def normalize_llm_base_url(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         normalized = value.strip()
+        if not normalized:
+            return None
         return normalized.rstrip("/")
+
+    @field_validator("llm_api_key", mode="before")
+    @classmethod
+    def normalize_optional_secret(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        normalized = value.strip()
+        return normalized or None
+
+    @field_validator("debug", "moodle_headless", mode="before")
+    @classmethod
+    def normalize_bool_like_values(cls, value: object) -> bool:
+        if isinstance(value, bool):
+            return value
+
+        if isinstance(value, str):
+            normalized = value.strip().casefold()
+            if normalized in {"1", "true", "yes", "on", "debug", "development"}:
+                return True
+            if normalized in {"0", "false", "no", "off", "release", "production"}:
+                return False
+
+        return bool(value)
 
     @field_validator("app_port")
     @classmethod

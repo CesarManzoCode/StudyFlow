@@ -144,6 +144,7 @@ class PlaywrightMoodleClient(MoodleClient):
 
     @asynccontextmanager
     async def _authenticated_page(self) -> AsyncIterator[Page]:
+        playwright = None
         browser: Browser | None = None
         context: BrowserContext | None = None
 
@@ -171,10 +172,11 @@ class PlaywrightMoodleClient(MoodleClient):
                 await context.close()
             if browser is not None:
                 await browser.close()
-            try:
-                await playwright.stop()
-            except Exception:
-                pass
+            if playwright is not None:
+                try:
+                    await playwright.stop()
+                except Exception:
+                    pass
 
     async def _login(self, page: Page) -> None:
         await page.goto(
@@ -213,7 +215,16 @@ class PlaywrightMoodleClient(MoodleClient):
 
     async def _wait_for_dashboard(self, page: Page) -> None:
         try:
-            await page.wait_for_selector("#block-timeline", timeout=self._navigation_timeout_ms)
+            await self._wait_for_any(
+                page,
+                (
+                    "#block-timeline",
+                    ".block-timeline",
+                    ".block_timeline",
+                    '[data-region="timeline"]',
+                    '[data-block="timeline"]',
+                ),
+            )
         except Exception as exc:
             msg = "Moodle dashboard timeline block could not be found."
             raise MoodleScrapingError(msg) from exc
@@ -235,7 +246,11 @@ class PlaywrightMoodleClient(MoodleClient):
         raise MoodleScrapingError(msg) from last_error
 
     async def _extract_timeline_events(self, page: Page) -> list[TimelineEvent]:
-        timeline_items = page.locator('#block-timeline [data-region="event-list-item"]')
+        timeline_items = page.locator(
+            '[data-region="timeline"] [data-region="event-list-item"], '
+            '.block-timeline [data-region="event-list-item"], '
+            '.block_timeline [data-region="event-list-item"]'
+        )
         item_count = await timeline_items.count()
 
         if item_count == 0:
@@ -563,4 +578,19 @@ class PlaywrightMoodleClient(MoodleClient):
             "abril": 4,
             "mayo": 5,
             "junio": 6,
+            "julio": 7,
+            "agosto": 8,
+            "septiembre": 9,
+            "setiembre": 9,
+            "octubre": 10,
+            "noviembre": 11,
+            "diciembre": 12,
         }
+
+        normalized = month_name.strip().casefold()
+        month = month_map.get(normalized)
+        if month is None:
+            msg = f"Unsupported Spanish month name: {month_name}"
+            raise MoodleScrapingError(msg)
+
+        return month

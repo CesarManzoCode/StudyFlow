@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.domain.models.task import Task
 from app.domain.enums import TaskPriority
+from app.domain.models.task import PrioritizedTask, Task
 
 
 @dataclass(frozen=True, slots=True)
@@ -18,6 +18,8 @@ class TaskViewModel:
     course_name: str
     status: str
     due_at: str | None
+    description_text: str | None
+    url: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,24 +44,26 @@ def map_task_to_viewmodel(task: Task) -> TaskViewModel:
         id=task.id,
         title=task.title,
         course_name=task.course_name,
-        status=task.status.value,
+        status=task.status.value.replace("_", " ").title(),
         due_at=_format_datetime(task.due_at),
+        description_text=task.description_text,
+        url=task.url,
     )
 
 
 def map_task_list(
-    tasks_with_priority: list[tuple[Task, TaskPriority]],
+    tasks_with_priority: list[PrioritizedTask],
 ) -> list[TaskListItemViewModel]:
     """
     Convert domain list into UI-ready list.
     """
     result: list[TaskListItemViewModel] = []
 
-    for task, priority in tasks_with_priority:
+    for prioritized_task in tasks_with_priority:
         result.append(
             TaskListItemViewModel(
-                task=map_task_to_viewmodel(task),
-                priority=priority,
+                task=map_task_to_viewmodel(prioritized_task.task),
+                priority=prioritized_task.priority,
             )
         )
 

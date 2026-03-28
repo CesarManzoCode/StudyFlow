@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} · {{ app_name }}{% endblock %}
+
+{% block content %}
+  <section class="page-section">
+    <div class="page-heading">
+      <div>
+        <p class="eyebrow">Task</p>
+        <h1 class="page-title">{{ task.title }}</h1>
+        <p class="page-description">
+          Review assignment details and request AI help only when needed.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <article class="card">
+      <div class="card__header">
+        <div>
+          <p class="card__eyebrow">Details</p>
+          <h2 class="card__title">Assignment information</h2>
+        </div>
+      </div>
+
+      <dl class="details-list">
+        <div class="details-list__row">
+          <dt>Course</dt>
+          <dd>{{ task.course_name }}</dd>
+        </div>
+
+        <div class="details-list__row">
+          <dt>Status</dt>
+          <dd>{{ task.status.value }}</dd>
+        </div>
+
+        <div class="details-list__row">
+          <dt>Due date</dt>
+          <dd>
+            {% if task.due_at %}
+              {{ task.due_at }}
+            {% else %}
+              Not defined
+            {% endif %}
+          </dd>
+        </div>
+      </dl>
+    </article>
+  </section>
+
+  <section class="page-section">
+    <article class="card">
+      <div class="card__header">
+        <div>
+          <p class="card__eyebrow">Description</p>
+          <h2 class="card__title">Task instructions</h2>
+        </div>
+      </div>
+
+      <div class="card__description">
+        {% if task.description_text %}
+          {{ task.description_text }}
+        {% else %}
+          <p class="helper-text">No description available.</p>
+        {% endif %}
+      </div>
+    </article>
+  </section>
+
+  <section class="page-section">
+    {% include "partials/ai_panel.html" %}
+  </section>
+
+{% endblock %}

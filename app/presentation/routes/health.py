@@ -1,26 +1,22 @@
+from __future__ import annotations
+
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
-from app.config import get_settings
+
+router = APIRouter(prefix="/health", tags=["health"])
 
 
-router = APIRouter(tags=["health"])
-
-
-@router.get("/health", response_class=JSONResponse)
-async def healthcheck() -> JSONResponse:
+@router.get("")
+async def health_check() -> JSONResponse:
     """
-    Lightweight health endpoint for local runtime verification.
+    Basic health check endpoint.
 
-    This endpoint intentionally verifies only that the web application is
-    running and that core configuration was loaded successfully. It does not
-    attempt network calls, scraping, or LLM provider checks.
+    Returns:
+        JSON response indicating service status.
     """
-    settings = get_settings()
-
-    payload = {
-        "status": "ok",
-        "app_name": settings.app_name,
-        "debug": settings.debug,
-    }
-    return JSONResponse(content=payload)
+    return JSONResponse(
+        {
+            "status": "ok",
+        }
+    )

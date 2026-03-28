@@ -183,6 +183,7 @@ MOODLE_HEADLESS=true
 # --- LLM ---
 LLM_PROVIDER=openai
 LLM_MODEL=gpt-5.4-nano
+LLM_LANGUAGE=Spanish
 LLM_BASE_URL=
 LLM_API_KEY=your_api_key_here
 
@@ -197,6 +198,7 @@ Si usas Ollama en lugar de OpenAI, una configuración típica se ve así:
 ```env
 LLM_PROVIDER=ollama
 LLM_MODEL=qwen3:latest
+LLM_LANGUAGE=Spanish
 LLM_BASE_URL=http://localhost:11434
 LLM_API_KEY=
 ```
@@ -325,6 +327,7 @@ MOODLE_HEADLESS=true
 # --- LLM ---
 LLM_PROVIDER=openai
 LLM_MODEL=gpt-5.4-nano
+LLM_LANGUAGE=Spanish
 LLM_BASE_URL=
 LLM_API_KEY=your_api_key_here
 
@@ -339,6 +342,7 @@ Si usas Ollama:
 ```env
 LLM_PROVIDER=ollama
 LLM_MODEL=qwen3:latest
+LLM_LANGUAGE=Spanish
 LLM_BASE_URL=http://localhost:11434
 LLM_API_KEY=
 ```

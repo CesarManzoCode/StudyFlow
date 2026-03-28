@@ -85,7 +85,7 @@ def build_app_container(settings: Settings | None = None) -> AppContainer:
     # Services
     # ---------------------------
     task_priority_service = TaskPriorityService()
-    prompt_builder = PromptBuilder()
+    prompt_builder = PromptBuilder(llm_language=resolved_settings.llm_language)
 
     # ---------------------------
     # Use cases

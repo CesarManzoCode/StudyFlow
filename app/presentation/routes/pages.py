@@ -49,6 +49,7 @@ async def _build_dashboard_context(
         moodle_headless=container.settings.moodle_headless,
         llm_provider=container.settings.llm_provider,
         llm_model=container.settings.llm_model,
+        llm_language=container.settings.llm_language,
         llm_base_url=container.settings.llm_base_url,
     )
 

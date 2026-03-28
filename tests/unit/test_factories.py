@@ -17,6 +17,7 @@ def _settings(**overrides: object) -> Settings:
         "moodle_headless": True,
         "llm_provider": "ollama",
         "llm_model": "demo-checklist",
+        "llm_language": "Spanish",
         "llm_base_url": "http://localhost:11434",
         "llm_api_key": None,
     }

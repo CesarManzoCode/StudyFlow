@@ -42,6 +42,7 @@ class Settings(BaseSettings):
 
     llm_provider: Literal["ollama", "openai", "groq", "anthropic"] = "ollama"
     llm_model: str = "demo-checklist"
+    llm_language: str = "Spanish"
     llm_base_url: str | None = "http://localhost:11434"
     llm_api_key: str | None = None
 
@@ -59,7 +60,13 @@ class Settings(BaseSettings):
         normalized = str(value).strip()
         return normalized.rstrip("/")
 
-    @field_validator("moodle_username", "moodle_password", "llm_model", mode="before")
+    @field_validator(
+        "moodle_username",
+        "moodle_password",
+        "llm_model",
+        "llm_language",
+        mode="before",
+    )
     @classmethod
     def normalize_required_text(cls, value: str) -> str:
         normalized = str(value).strip()

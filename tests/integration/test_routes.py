@@ -35,6 +35,7 @@ def _container() -> SimpleNamespace:
         moodle_headless=True,
         llm_provider="ollama",
         llm_model="demo-checklist",
+        llm_language="Spanish",
         llm_api_key="stored-api-key",
         llm_base_url="http://localhost:11434",
     )
@@ -182,6 +183,7 @@ def test_settings_get_and_save_preserve_secret_values_when_blank() -> None:
                 "moodle_password": "",
                 "llm_provider": "openai",
                 "llm_model": "gpt-5.4-nano",
+                "llm_language": "Spanish",
                 "llm_api_key": "",
                 "llm_base_url": "https://api.openai.com/v1",
             },
@@ -194,6 +196,7 @@ def test_settings_get_and_save_preserve_secret_values_when_blank() -> None:
     kwargs = container.save_settings.execute.await_args.kwargs
     assert kwargs["moodle_password"] == "stored-password"
     assert kwargs["llm_api_key"] == "stored-api-key"
+    assert kwargs["llm_language"] == "Spanish"
 
 
 def test_settings_save_returns_400_on_validation_error() -> None:
@@ -211,6 +214,7 @@ def test_settings_save_returns_400_on_validation_error() -> None:
                 "moodle_password": "",
                 "llm_provider": "openai",
                 "llm_model": "gpt-5.4-nano",
+                "llm_language": "Spanish",
                 "llm_api_key": "",
                 "llm_base_url": "https://api.openai.com/v1",
             },

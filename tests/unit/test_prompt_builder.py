@@ -32,6 +32,7 @@ def test_build_task_help_prompt_contains_required_sections() -> None:
     assert "Title: Homework 2" in prompt
     assert "Status: pending" in prompt
     assert "https://example.edu/moodle/task-1" in prompt
+    assert "Always answer in Spanish." in prompt
 
 
 def test_build_task_help_prompt_uses_default_request_when_blank_question() -> None:
@@ -56,3 +57,10 @@ def test_build_task_help_prompt_handles_missing_due_date() -> None:
     prompt = builder.build_task_help_prompt(task=_task(due_at=None))
 
     assert "Due at: No due date" in prompt
+
+
+def test_build_task_help_prompt_uses_configured_language() -> None:
+    builder = PromptBuilder(llm_language="English")
+    prompt = builder.build_task_help_prompt(task=_task())
+
+    assert "Always answer in English." in prompt

@@ -15,6 +15,7 @@ class SettingsViewModel:
 
     llm_provider: str
     llm_model: str
+    llm_language: str
     llm_base_url: str
 
 
@@ -29,6 +30,7 @@ def map_settings_to_viewmodel(
     moodle_headless: bool,
     llm_provider: str,
     llm_model: str,
+    llm_language: str,
     llm_base_url: str | None = None,
 ) -> SettingsViewModel:
     """
@@ -40,5 +42,6 @@ def map_settings_to_viewmodel(
         moodle_headless=moodle_headless,
         llm_provider=llm_provider,
         llm_model=llm_model,
+        llm_language=llm_language,
         llm_base_url=llm_base_url or "",
     )

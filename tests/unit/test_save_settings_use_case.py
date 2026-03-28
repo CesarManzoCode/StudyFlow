@@ -36,6 +36,7 @@ async def test_execute_writes_expected_env_file_and_clears_cache(
         moodle_password=" pass with spaces ",
         llm_provider=" openai ",
         llm_model=" gpt-5.4-nano ",
+        llm_language=" Spanish ",
         llm_api_key=" key#123 ",
         llm_base_url=" https://api.example.com/v1 ",
     )
@@ -51,6 +52,7 @@ async def test_execute_writes_expected_env_file_and_clears_cache(
     assert "MOODLE_HEADLESS=true" in content
     assert "LLM_PROVIDER=openai" in content
     assert "LLM_MODEL=gpt-5.4-nano" in content
+    assert "LLM_LANGUAGE=Spanish" in content
     assert "LLM_BASE_URL=https://api.example.com/v1" in content
     assert 'LLM_API_KEY="key#123"' in content
 

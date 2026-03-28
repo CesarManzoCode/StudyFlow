@@ -91,6 +91,17 @@
         </label>
 
         <label class="stack">
+          <span>LLM language</span>
+          <input
+            type="text"
+            name="llm_language"
+            value="{{ settings.llm_language }}"
+            placeholder="Spanish"
+            required
+          />
+        </label>
+
+        <label class="stack">
           <span>LLM API key</span>
           <input
             type="password"
@@ -147,6 +158,10 @@
         <div class="details-list__row">
           <dt>Model</dt>
           <dd>{{ settings.llm_model }}</dd>
+        </div>
+        <div class="details-list__row">
+          <dt>Language</dt>
+          <dd>{{ settings.llm_language }}</dd>
         </div>
       </dl>
     </article>

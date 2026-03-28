@@ -10,6 +10,7 @@ def test_settings_normalize_values_and_bool_like_inputs() -> None:
         moodle_username=" student ",
         moodle_password=" secret ",
         llm_model=" qwen3:latest ",
+        llm_language=" Spanish ",
         app_host=" 127.0.0.1 ",
         static_url_path="/assets/",
         llm_base_url=" http://localhost:11434/ ",
@@ -22,6 +23,7 @@ def test_settings_normalize_values_and_bool_like_inputs() -> None:
     assert settings.moodle_username == "student"
     assert settings.moodle_password == "secret"
     assert settings.llm_model == "qwen3:latest"
+    assert settings.llm_language == "Spanish"
     assert settings.app_host == "127.0.0.1"
     assert settings.static_url_path == "/assets"
     assert settings.llm_base_url == "http://localhost:11434"

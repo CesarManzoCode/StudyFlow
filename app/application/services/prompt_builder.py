@@ -9,6 +9,9 @@ class PromptBuilder:
     implementations can remain thin and focused on transport concerns.
     """
 
+    def __init__(self, llm_language: str = "Spanish") -> None:
+        self._llm_language = llm_language.strip() or "Spanish"
+
     def build_task_help_prompt(
         self,
         task: Task,
@@ -92,6 +95,7 @@ class PromptBuilder:
             "Behavior rules:\n"
             "- Be concrete and concise.\n"
             "- Use simple language.\n"
+            f"- Always answer in {self._llm_language}.\n"
             "- Do not invent requirements that are not present in the task.\n"
             "- If something is ambiguous, mention it under Questions to clarify.\n"
             "- Focus on what the student should actually do.\n"

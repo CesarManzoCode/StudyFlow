@@ -16,6 +16,7 @@ def test_settings_form_normalizes_text_and_optional_secrets() -> None:
         moodle_username="  student  ",
         llm_provider="  openai  ",
         llm_model="  gpt-5.4-nano  ",
+        llm_language="  Spanish  ",
         moodle_password="   ",
         llm_api_key=None,
         llm_base_url="  https://api.openai.com/v1  ",
@@ -25,6 +26,7 @@ def test_settings_form_normalizes_text_and_optional_secrets() -> None:
     assert form.moodle_username == "student"
     assert form.llm_provider == "openai"
     assert form.llm_model == "gpt-5.4-nano"
+    assert form.llm_language == "Spanish"
     assert form.moodle_password is None
     assert form.llm_api_key is None
     assert form.llm_base_url == "https://api.openai.com/v1"

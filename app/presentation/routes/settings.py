@@ -31,6 +31,7 @@ def _map_container_settings(container: AppContainer):
         moodle_headless=container.settings.moodle_headless,
         llm_provider=container.settings.llm_provider,
         llm_model=container.settings.llm_model,
+        llm_language=container.settings.llm_language,
         llm_base_url=container.settings.llm_base_url,
     )
 
@@ -42,6 +43,7 @@ def _map_form_settings(form: SettingsForm):
         moodle_headless=True,
         llm_provider=form.llm_provider,
         llm_model=form.llm_model,
+        llm_language=form.llm_language,
         llm_base_url=form.llm_base_url,
     )
 
@@ -97,6 +99,7 @@ async def save_settings(
             moodle_password=resolved_moodle_password,
             llm_provider=form.llm_provider,
             llm_model=form.llm_model,
+            llm_language=form.llm_language,
             llm_api_key=resolved_llm_api_key,
             llm_base_url=form.llm_base_url,
         )

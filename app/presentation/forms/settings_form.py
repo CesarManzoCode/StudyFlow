@@ -18,6 +18,7 @@ class SettingsForm(BaseModel):
     moodle_password: str | None = None
     llm_provider: str
     llm_model: str
+    llm_language: str
     llm_api_key: str | None = None
     llm_base_url: str | None = None
 
@@ -28,6 +29,7 @@ class SettingsForm(BaseModel):
         moodle_username: Annotated[str, Form(...)],
         llm_provider: Annotated[str, Form(...)],
         llm_model: Annotated[str, Form(...)],
+        llm_language: Annotated[str, Form(...)],
         moodle_password: Annotated[str | None, Form()] = None,
         llm_api_key: Annotated[str | None, Form()] = None,
         llm_base_url: Annotated[str | None, Form()] = None,
@@ -48,6 +50,7 @@ class SettingsForm(BaseModel):
             moodle_password=normalize(moodle_password),
             llm_provider=normalize(llm_provider) or "",
             llm_model=normalize(llm_model) or "",
+            llm_language=normalize(llm_language) or "",
             llm_api_key=normalize(llm_api_key),
             llm_base_url=normalize(llm_base_url),
         )

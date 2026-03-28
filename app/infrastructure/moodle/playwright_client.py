@@ -563,3 +563,4 @@ class PlaywrightMoodleClient(MoodleClient):
             "abril": 4,
             "mayo": 5,
             "junio": 6,
+        }

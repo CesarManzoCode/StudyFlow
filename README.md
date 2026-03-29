@@ -1,5 +1,87 @@
 # StudyFlow
 
+> Convierte "tengo entregas pendientes" en "sé exactamente qué hacer ahora".
+
+StudyFlow funciona como una capa de ejecución encima de Moodle: sincroniza tareas reales, te ayuda a priorizar y te entrega una guía accionable con IA para empezar sin fricción.
+
+## Landing Mental (Lectura Rápida)
+
+### 1) Problema
+
+- Tienes varias tareas abiertas, pero no un plan concreto.
+- Moodle muestra información, pero no siempre reduce la ambiguedad.
+- La fricción de decidir por dónde empezar te empuja a procrastinar.
+
+### 2) Solución
+
+- StudyFlow sincroniza pendientes desde Moodle.
+- Te muestra qué conviene abordar hoy.
+- Genera ayuda estructurada por tarea: resumen, entregable, pasos, riesgos y checklist final.
+
+### 3) Demo Mental
+
+1. Abres el dashboard y pulsas `Refresh tasks`.
+2. Ves las tareas urgentes en un solo lugar.
+3. Abres una tarea y pides ayuda a la IA.
+4. Recibes pasos accionables con salida práctica para ejecutar.
+5. Pasas de incertidumbre a acción en minutos.
+
+### 4) Diferenciación
+
+- Moodle te dice qué existe.
+- StudyFlow te ayuda a decidir y ejecutar qué hacer ahora.
+- Un chat genérico de IA te obliga a copiar/pegar contexto cada vez; aquí el contexto ya está en el flujo.
+
+### 5) Instalación Rápida
+
+Linux/macOS:
+
+```bash
+git clone https://github.com/CesarManzoCode/StudyFlow.git
+cd StudyFlow
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+playwright install chromium
+cp .env.example .env
+python scripts/run.py
+```
+
+Windows (PowerShell):
+
+```powershell
+git clone https://github.com/CesarManzoCode/StudyFlow.git
+cd StudyFlow
+py -m venv .venv
+.venv\Scripts\activate
+pip install -e .
+playwright install chromium
+copy .env.example .env
+python scripts/run.py
+```
+
+Abre `http://127.0.0.1:8000`.
+
+## Índice
+
+- [Qué Problema Resuelve](#qué-problema-resuelve)
+- [Por Qué Usar StudyFlow](#por-qué-usar-studyflow)
+- [Qué Puedes Hacer Con Él](#qué-puedes-hacer-con-él)
+- [Para Quién Es](#para-quién-es)
+- [Para Quién No Es](#para-quién-no-es)
+- [Idea Principal](#idea-principal)
+- [Guía de Instalación](#guía-de-instalación)
+- [Instalación en Windows](#instalación-en-windows)
+- [Instalación en Linux](#instalación-en-linux)
+- [Primer Uso Después de la Instalación](#primer-uso-después-de-la-instalación)
+- [Uso Diario](#uso-diario)
+- [Proveedores de IA Compatibles](#proveedores-de-ia-compatibles)
+- [Compensaciones](#compensaciones)
+- [Expectativas Importantes](#expectativas-importantes)
+- [Privacidad y Uso Local](#privacidad-y-uso-local)
+- [Si Algo No Funciona](#si-algo-no-funciona)
+- [Resumen Final](#resumen-final)
+
 StudyFlow es una aplicación web local que te ayuda a convertir tareas de Moodle en un plan de trabajo claro y manejable.
 
 En lugar de estar saltando entre Moodle, fechas de entrega, descripciones de tareas y herramientas de chat con IA, StudyFlow pone todo en un flujo simple:

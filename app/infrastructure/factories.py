@@ -9,6 +9,13 @@ from app.application.services.task_priority_service import TaskPriorityService
 from app.application.use_cases.generate_task_help import GenerateTaskHelpUseCase
 from app.application.use_cases.get_task_detail import GetTaskDetailUseCase
 from app.application.use_cases.list_tasks import ListTasksUseCase
+from app.application.use_cases.manage_task_state import (
+    GetTaskStateUseCase,
+    RecordAIInteractionUseCase,
+    ToggleChecklistItemUseCase,
+    UpdateTaskChecklistUseCase,
+    UpdateTaskNotesUseCase,
+)
 from app.application.use_cases.save_settings import SaveSettingsUseCase
 from app.application.use_cases.sync_tasks import SyncTasksUseCase
 from app.application.use_cases.validate_provider import ValidateProviderUseCase
@@ -18,8 +25,12 @@ from app.domain.models.checklist import ChecklistResponse
 from app.domain.models.task import Task
 from app.domain.ports.llm_client import LlmClient
 from app.domain.ports.moodle_client import MoodleClient
+from app.domain.ports.state_repository import StateRepository
 from app.domain.ports.task_repository import TaskRepository
 from app.infrastructure.cache.in_memory_task_store import InMemoryTaskStore
+from app.infrastructure.persistence.persistent_state_store import (
+    PersistentTaskStateStore,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -42,6 +53,7 @@ class AppContainer:
 
     # core
     task_repository: TaskRepository
+    state_repository: StateRepository
     moodle_client: MoodleClient
     llm_client: LlmClient
 
@@ -49,13 +61,20 @@ class AppContainer:
     task_priority_service: TaskPriorityService
     prompt_builder: PromptBuilder
 
-    # use cases
+    # use cases - tasks
     list_tasks: ListTasksUseCase
     get_task_detail: GetTaskDetailUseCase
     sync_tasks: SyncTasksUseCase
     generate_task_help: GenerateTaskHelpUseCase
     save_settings: SaveSettingsUseCase
     validate_provider: ValidateProviderUseCase
+
+    # use cases - task state
+    get_task_state: GetTaskStateUseCase
+    update_task_notes: UpdateTaskNotesUseCase
+    update_task_checklist: UpdateTaskChecklistUseCase
+    toggle_checklist_item: ToggleChecklistItemUseCase
+    record_ai_interaction: RecordAIInteractionUseCase
 
 
 # =========================================================
@@ -78,6 +97,7 @@ def build_app_container(settings: Settings | None = None) -> AppContainer:
     # Infrastructure
     # ---------------------------
     task_repository = InMemoryTaskStore()
+    state_repository = PersistentTaskStateStore()
     moodle_client = _build_moodle_client(resolved_settings)
     llm_client = _build_llm_client(resolved_settings)
 
@@ -88,7 +108,7 @@ def build_app_container(settings: Settings | None = None) -> AppContainer:
     prompt_builder = PromptBuilder(llm_language=resolved_settings.llm_language)
 
     # ---------------------------
-    # Use cases
+    # Use cases - tasks
     # ---------------------------
     list_tasks = ListTasksUseCase(
         task_repository=task_repository,
@@ -114,9 +134,25 @@ def build_app_container(settings: Settings | None = None) -> AppContainer:
     save_settings = SaveSettingsUseCase()
     validate_provider = ValidateProviderUseCase()
 
+    # ---------------------------
+    # Use cases - task state
+    # ---------------------------
+    get_task_state = GetTaskStateUseCase(state_repo=state_repository)
+    update_task_notes = UpdateTaskNotesUseCase(state_repo=state_repository)
+    update_task_checklist = UpdateTaskChecklistUseCase(
+        state_repo=state_repository
+    )
+    toggle_checklist_item = ToggleChecklistItemUseCase(
+        state_repo=state_repository
+    )
+    record_ai_interaction = RecordAIInteractionUseCase(
+        state_repo=state_repository
+    )
+
     return AppContainer(
         settings=resolved_settings,
         task_repository=task_repository,
+        state_repository=state_repository,
         moodle_client=moodle_client,
         llm_client=llm_client,
         task_priority_service=task_priority_service,
@@ -127,6 +163,11 @@ def build_app_container(settings: Settings | None = None) -> AppContainer:
         generate_task_help=generate_task_help,
         save_settings=save_settings,
         validate_provider=validate_provider,
+        get_task_state=get_task_state,
+        update_task_notes=update_task_notes,
+        update_task_checklist=update_task_checklist,
+        toggle_checklist_item=toggle_checklist_item,
+        record_ai_interaction=record_ai_interaction,
     )
 
 

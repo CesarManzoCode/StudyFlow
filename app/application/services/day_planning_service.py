@@ -1,0 +1,234 @@
+from datetime import datetime, timedelta
+
+from app.domain.enums import TaskPriority
+from app.domain.models.day_plan import (
+    CognitiveLoad,
+    DayPlan,
+    EstimatedTaskSize,
+    PlannedTask,
+    TaskDifficulty,
+)
+from app.domain.models.task import PrioritizedTask, Task
+from app.domain.ports.llm_client import LlmClient
+
+
+class DayPlaningService:
+    """
+    Orchestrate daily task planning with time estimation, difficulty assessment,
+    and cognitive load pacing.
+
+    This service transforms a prioritized task list into a scheduled day plan
+    that balances urgency (deadline) with cognitive feasibility (effort + pacing).
+    """
+
+    def __init__(self, llm_client: LlmClient | None = None) -> None:
+        self._llm_client = llm_client
+
+    async def plan_day(
+        self,
+        prioritized_tasks: list[PrioritizedTask],
+        now: datetime,
+        max_minutes: int = 480,  # 8 hours
+    ) -> DayPlan:
+        """
+        Create a day plan from prioritized tasks.
+
+        Args:
+            prioritized_tasks: Tasks already sorted by priority (from TaskPriorityService)
+            now: Current datetime
+            max_minutes: Maximum time budget for the day (default 8 hours)
+
+        Returns:
+            DayPlan with ordered task sequence
+        """
+        # Filter to tasks that should be done today (critical + high priority)
+        today_candidates = [
+            pt for pt in prioritized_tasks
+            if pt.priority in {TaskPriority.CRITICAL, TaskPriority.HIGH}
+        ]
+
+        # Estimate time and difficulty for each candidate
+        estimated_tasks = []
+        for prioritized_task in today_candidates:
+            estimated_tasks.append(
+                await self._estimate_task(prioritized_task.task)
+            )
+
+        # Sort by priority + deadline, then apply cognitive pacing
+        sorted_tasks = self._sort_by_cognitive_pacing(estimated_tasks)
+
+        # Allocate to fit within max_minutes
+        allocated_tasks = self._allocate_to_time_budget(
+            sorted_tasks, max_minutes
+        )
+
+        # Create day plan
+        plan = DayPlan(
+            created_at=now,
+            planned_for_date=now.replace(hour=0, minute=0, second=0, microsecond=0),
+            planned_tasks=allocated_tasks,
+            total_estimated_minutes=sum(t.estimated_minutes for t in allocated_tasks),
+            pending_tasks_count=len(prioritized_tasks) - len(allocated_tasks),
+        )
+
+        return plan
+
+    async def _estimate_task(self, task: Task) -> PlannedTask:
+        """
+        Estimate time, size, difficulty, and cognitive load for a task.
+        """
+        # Start with reasonable defaults
+        estimated_minutes = self._estimate_minutes_from_description(task.description_text or "")
+        difficulty = self._infer_difficulty_from_description(task.description_text or "")
+        cognitive_load = self._infer_cognitive_load(difficulty)
+
+        size = self._minutes_to_size(estimated_minutes)
+
+        return PlannedTask(
+            task=task,
+            priority=task.status,  # type: ignore
+            estimated_minutes=estimated_minutes,
+            size=size,
+            difficulty=difficulty,
+            cognitive_load=cognitive_load,
+        )
+
+    def _estimate_minutes_from_description(self, description: str) -> int:
+        """
+        Heuristic time estimation based on description keywords.
+        """
+        description_lower = description.lower()
+
+        # Keywords for different durations
+        short_keywords = ["write", "review", "check", "read", "edit"]
+        medium_keywords = ["create", "design", "analyze", "research", "implement"]
+        long_keywords = ["develop", "comprehensive", "project", "build", "system"]
+
+        for kw in long_keywords:
+            if kw in description_lower:
+                return 120  # 2 hours
+
+        for kw in medium_keywords:
+            if kw in description_lower:
+                return 60  # 1 hour
+
+        for kw in short_keywords:
+            if kw in description_lower:
+                return 30  # 30 min
+
+        # Default for unclear descriptions
+        return 45  # 45 min
+
+    def _infer_difficulty_from_description(self, description: str) -> TaskDifficulty:
+        """
+        Infer difficulty from description keywords.
+        """
+        description_lower = description.lower()
+
+        hard_keywords = ["complex", "difficult", "advanced", "challenging", "critical"]
+        easy_keywords = ["simple", "basic", "easy", "straightforward", "routine"]
+
+        for kw in hard_keywords:
+            if kw in description_lower:
+                return TaskDifficulty.HARD
+
+        for kw in easy_keywords:
+            if kw in description_lower:
+                return TaskDifficulty.EASY
+
+        return TaskDifficulty.MODERATE
+
+    def _infer_cognitive_load(self, difficulty: TaskDifficulty) -> CognitiveLoad:
+        """
+        Map difficulty to cognitive load.
+        """
+        if difficulty == TaskDifficulty.HARD:
+            return CognitiveLoad.HEAVY
+        elif difficulty == TaskDifficulty.EASY:
+            return CognitiveLoad.LIGHT
+        else:
+            return CognitiveLoad.MODERATE
+
+    def _minutes_to_size(self, minutes: int) -> EstimatedTaskSize:
+        """Convert minutes to EstimatedTaskSize category."""
+        if minutes < 30:
+            return EstimatedTaskSize.SHORT
+        elif minutes > 90:
+            return EstimatedTaskSize.LONG
+        else:
+            return EstimatedTaskSize.MEDIUM
+
+    def _sort_by_cognitive_pacing(
+        self, tasks: list[PlannedTask]
+    ) -> list[PlannedTask]:
+        """
+        Sort tasks by urgency, then apply cognitive pacing.
+
+        Strategy:
+        1. Place CRITICAL tasks (deadlines matter most)
+        2. Alternate HEAVY/LIGHT cognitive loads for better endurance
+        3. Place MEDIUM/HIGH priority tasks
+        """
+        critical_tasks = [t for t in tasks if t.priority == TaskPriority.CRITICAL]
+        high_tasks = [t for t in tasks if t.priority == TaskPriority.HIGH]
+
+        # Sort each group by deadline
+        critical_tasks.sort(
+            key=lambda t: (
+                t.task.due_at or datetime.max,
+                t.difficulty.value,
+            )
+        )
+        high_tasks.sort(
+            key=lambda t: (
+                t.task.due_at or datetime.max,
+                t.difficulty.value,
+            )
+        )
+
+        # Merge with cognitive pacing: alternate heavy/light
+        result = []
+        last_load = None
+
+        for task in critical_tasks + high_tasks:
+            # If last task was heavy, try to pick a light one
+            if last_load == CognitiveLoad.HEAVY and any(
+                t.cognitive_load == CognitiveLoad.LIGHT and t not in result
+                for t in tasks
+            ):
+                light_task = next(
+                    (t for t in tasks
+                     if t.cognitive_load == CognitiveLoad.LIGHT and t not in result),
+                    task,
+                )
+                result.append(light_task)
+                last_load = light_task.cognitive_load
+            else:
+                result.append(task)
+                last_load = task.cognitive_load
+
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_result = []
+        for task in result:
+            if task.task.id not in seen:
+                unique_result.append(task)
+                seen.add(task.task.id)
+
+        return unique_result
+
+    def _allocate_to_time_budget(
+        self, tasks: list[PlannedTask], max_minutes: int
+    ) -> list[PlannedTask]:
+        """
+        Allocate tasks that fit within time budget.
+        """
+        allocated = []
+        total_minutes = 0
+
+        for task in tasks:
+            if total_minutes + task.estimated_minutes <= max_minutes:
+                allocated.append(task)
+                total_minutes += task.estimated_minutes
+
+        return allocated

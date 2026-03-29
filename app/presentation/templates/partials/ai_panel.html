@@ -2,8 +2,8 @@
   <article class="card">
     <div class="card__header">
       <div>
-        <p class="card__eyebrow">AI help</p>
-        <h2 class="card__title">Request task assistance</h2>
+        <p class="card__eyebrow">AI SYSTEM</p>
+        <h2 class="card__title">Request task cognitive breakdown</h2>
       </div>
     </div>
 
@@ -14,73 +14,80 @@
     >
       <textarea
         name="user_question"
-        placeholder="Optional: ask something specific (e.g., 'give me step-by-step instructions')"
+        style="background: var(--bg-elevated-2); border: 1px solid var(--border-strong); color: var(--text); padding: 1rem; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.9rem;"
+        placeholder=">_ Enter optional parameters (e.g., 'focus only on API routes')"
       >{{ ai_form.user_question if ai_form and ai_form.user_question else "" }}</textarea>
-
       <button
         type="submit"
         class="button button--primary"
+        style="font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em;"
       >
-        Generate checklist
+        [EXECUTE] Generate Analysis
       </button>
 
-      <p class="helper-text">
-        The AI will analyze the task and generate a clear, actionable checklist.
+      <p class="helper-text" style="font-family: var(--font-mono); font-size: 0.8rem; opacity: 0.7;">
+        System will parse task parameters and generate an actionable cognitive sequence.
       </p>
     </form>
 
     {% if checklist %}
-      <div class="card" style="margin-top: 1rem;">
+      <div class="card card--ai-result" style="margin-top: 2rem;">
         <div class="card__header">
           <div>
-            <p class="card__eyebrow">Result</p>
-            <h2 class="card__title">AI-generated checklist</h2>
+            <p class="card__eyebrow" style="color: var(--primary);">SUCCESS: SYNTHESIS COMPLETE</p>
+            <h2 class="card__title">Operational Blueprint</h2>
           </div>
         </div>
 
         <div class="stack">
           <div>
-            <h3>Summary</h3>
-            <p>{{ checklist.summary }}</p>
+            <h3>Executive Summary</h3>
+            <p style="color: var(--text-soft); line-height: 1.6;">{{ checklist.summary }}</p>
           </div>
 
           <div>
-            <h3>Deliverable</h3>
-            <p>{{ checklist.deliverable }}</p>
+            <h3>Expected Artifact</h3>
+            <p style="color: var(--accent); font-family: var(--font-mono); background: var(--accent-soft); padding: 0.75rem; border-radius: 6px; border: 1px solid rgba(97, 184, 255, 0.2);">
+              {{ checklist.deliverable }}
+            </p>
           </div>
 
           <div>
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-              <h3 style="margin: 0;">Steps</h3>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+              <h3 style="margin: 0; border: none; padding: 0;">Execution Sequence</h3>
               <button 
                 type="button"
-                class="button button--secondary"
+                class="button button--glow"
                 onclick="loadEnhancedSteps()"
                 style="margin: 0;"
               >
-                Load with estimates
+                [+] INIT COGNITIVE SCAN
               </button>
             </div>
             
             <div id="steps-container">
               {% if checklist.steps %}
-                <ul>
+                <ul class="steps-list" style="list-style: none; padding-left: 0;">
                   {% for step in checklist.steps %}
-                    <li>{{ step }}</li>
+                    <li style="margin-bottom: 0.75rem; padding: 0.75rem; background: var(--bg-elevated); border-left: 2px solid var(--border-strong); border-radius: 0 6px 6px 0;">
+                      <span style="color: var(--primary); font-family: var(--font-mono); margin-right: 0.5rem;">></span> {{ step }}
+                    </li>
                   {% endfor %}
                 </ul>
               {% else %}
-                <p class="helper-text">No step list was generated.</p>
+                <p class="helper-text">No step sequence generated.</p>
               {% endif %}
             </div>
           </div>
 
           {% if checklist.warnings %}
             <div>
-              <h3>Warnings</h3>
-              <ul>
+              <h3 style="color: var(--warning); border-bottom-color: rgba(255, 204, 102, 0.3);">System Warnings</h3>
+              <ul style="list-style: none; padding-left: 0;">
                 {% for w in checklist.warnings %}
-                  <li>{{ w }}</li>
+                  <li style="color: var(--warning); font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; gap: 0.5rem; align-items: flex-start;">
+                    <span style="margin-top: 0.1rem;">⚠️</span> <span>{{ w }}</span>
+                  </li>
                 {% endfor %}
               </ul>
             </div>
@@ -88,25 +95,29 @@
 
           {% if checklist.questions_to_clarify %}
             <div>
-              <h3>Questions to clarify</h3>
-              <ul>
+              <h3 style="color: var(--accent); border-bottom-color: rgba(97, 184, 255, 0.3);">Data Required</h3>
+              <ul style="list-style: none; padding-left: 0;">
                 {% for q in checklist.questions_to_clarify %}
-                  <li>{{ q }}</li>
+                  <li style="color: var(--text-soft); font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; gap: 0.5rem; align-items: flex-start;">
+                    <span style="color: var(--accent); font-family: var(--font-mono);">?</span> <span>{{ q }}</span>
+                  </li>
                 {% endfor %}
               </ul>
             </div>
           {% endif %}
 
-          <div>
-            <h3>Final checklist</h3>
+          <div style="margin-top: 1rem; padding-top: 1.5rem; border-top: 1px dashed var(--border-strong);">
+            <h3 style="color: var(--primary); border: none; padding: 0;">Verification Matrix</h3>
             {% if checklist.final_checklist %}
-              <ul>
+              <ul style="list-style: none; padding-left: 0; display: grid; gap: 0.5rem;">
                 {% for item in checklist.final_checklist %}
-                  <li>✔ {{ item }}</li>
+                  <li style="background: rgba(73, 242, 184, 0.05); padding: 0.75rem 1rem; border-radius: 6px; font-family: var(--font-mono); font-size: 0.9rem; border: 1px solid rgba(73, 242, 184, 0.1); display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="color: var(--primary);">[ ]</span> {{ item }}
+                  </li>
                 {% endfor %}
               </ul>
             {% else %}
-              <p class="helper-text">No final checklist items were generated.</p>
+              <p class="helper-text">No verification matrix generated.</p>
             {% endif %}
           </div>
         </div>

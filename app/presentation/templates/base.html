@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta
@@ -11,6 +11,20 @@
       content="Local-first Moodle assistant for reviewing pending tasks and requesting AI help."
     />
     <title>{% block title %}{{ page_title }} · {{ app_name }}{% endblock %}</title>
+
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;700&display=swap"
+    />
 
     <link
       rel="stylesheet"
@@ -35,7 +49,17 @@
     ></script>
     {% block head %}{% endblock %}
   </head>
-  <body>
+  <body class="{% block body_class %}app-body{% endblock %}">
+    <div
+      class="app-backdrop"
+      aria-hidden="true"
+    >
+      <div class="app-backdrop__grid"></div>
+      <div class="app-backdrop__glow app-backdrop__glow--one"></div>
+      <div class="app-backdrop__glow app-backdrop__glow--two"></div>
+      <div class="app-backdrop__scanlines"></div>
+    </div>
+
     <div class="app-shell">
       <header class="app-header">
         <div class="container app-header__inner">
@@ -44,15 +68,35 @@
               href="/"
               class="app-brand__link"
             >
-              <span class="app-brand__title">{{ app_name }}</span>
+              <span class="app-brand__mark">SF</span>
+              <span class="app-brand__copy">
+                <span class="app-brand__title">{{ app_name }}</span>
+                <span class="app-brand__subtitle">Dark academic operations center</span>
+              </span>
             </a>
-            <p class="app-brand__subtitle">
-              Moodle task triage and on-demand AI help
-            </p>
           </div>
 
+          <nav
+            class="app-nav"
+            aria-label="Primary"
+          >
+            <a
+              href="/"
+              class="app-nav__link {% if request.url.path == '/' %}app-nav__link--active{% endif %}"
+            >
+              Dashboard
+            </a>
+            <a
+              href="/settings"
+              class="app-nav__link {% if request.url.path == '/settings' %}app-nav__link--active{% endif %}"
+            >
+              Settings
+            </a>
+          </nav>
+
           <div class="app-header__meta">
-            <span class="status-badge status-badge--neutral">Local network app</span>
+            <span class="status-badge status-badge--live">local-first</span>
+            <span class="status-badge status-badge--neutral">manual sync</span>
           </div>
         </div>
       </header>
@@ -62,6 +106,14 @@
           {% block content %}{% endblock %}
         </div>
       </main>
+
+      <footer class="app-footer">
+        <div class="container app-footer__inner">
+          <p class="app-footer__text">
+            Interfaz táctica para Moodle y ayuda AI bajo demanda, sin tocar tu backend de Python.
+          </p>
+        </div>
+      </footer>
     </div>
 
     {% block scripts %}{% endblock %}

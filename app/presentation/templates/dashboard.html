@@ -1,121 +1,200 @@
 {% extends "base.html" %}
 
 {% block title %}{{ page_title }} · {{ app_name }}{% endblock %}
+{% block body_class %}app-body app-body--dashboard{% endblock %}
 
 {% block content %}
-  <section class="page-section">
-    <div class="page-heading">
-      <div>
-        <p class="eyebrow">Dashboard</p>
-        <h1 class="page-title">Pending assignments overview</h1>
-        <p class="page-description">
-          Review your Moodle account, manually refresh pending work, and request
-          AI help only when you need it.
-        </p>
+  <section class="page-section hero hero--dashboard">
+    <div class="hero__content">
+      <p class="eyebrow">Ops Dashboard</p>
+      <h1 class="hero__title">Convierte tu carga académica en una consola clara, oscura y accionable.</h1>
+      <p class="hero__description">
+        Centraliza tareas pendientes, sincroniza Moodle solo cuando tú lo decidas y
+        usa IA como una herramienta táctica, no como ruido.
+      </p>
+
+      <div class="hero__actions">
+        <form
+          method="post"
+          action="/sync"
+          class="inline-form"
+        >
+          <button
+            type="submit"
+            class="button button--primary"
+          >
+            Sincronizar Moodle
+          </button>
+        </form>
+
+        <a
+          href="/settings"
+          class="button button--secondary"
+        >
+          Ajustar runtime
+        </a>
+      </div>
+
+      <div class="hero__stats">
+        <article class="metric-card">
+          <span class="metric-card__label">Tareas pendientes</span>
+          <strong class="metric-card__value">{{ tasks|length }}</strong>
+          <span class="metric-card__hint">Buffer activo</span>
+        </article>
+
+        <article class="metric-card">
+          <span class="metric-card__label">Última sync</span>
+          <strong class="metric-card__value metric-card__value--small">
+            {{ last_sync_display if last_sync_display else "Pendiente" }}
+          </strong>
+          <span class="metric-card__hint">Control manual</span>
+        </article>
+
+        <article class="metric-card">
+          <span class="metric-card__label">Proveedor AI</span>
+          <strong class="metric-card__value">{{ settings.llm_provider }}</strong>
+          <span class="metric-card__hint">Motor configurado</span>
+        </article>
+
+        <article class="metric-card">
+          <span class="metric-card__label">Modelo</span>
+          <strong class="metric-card__value metric-card__value--small">{{ settings.llm_model }}</strong>
+          <span class="metric-card__hint">Perfil actual</span>
+        </article>
       </div>
     </div>
+
+    <aside class="hero__panel terminal-panel">
+      <div class="terminal-panel__header">
+        <span class="terminal-dot"></span>
+        <span>system.telemetry</span>
+      </div>
+
+      <div class="terminal-panel__body">
+        <div class="terminal-panel__row">
+          <span class="terminal-panel__key">moodle_url</span>
+          <strong class="terminal-panel__value">{{ settings.moodle_base_url }}</strong>
+        </div>
+        <div class="terminal-panel__row">
+          <span class="terminal-panel__key">operator</span>
+          <strong class="terminal-panel__value">{{ settings.moodle_username }}</strong>
+        </div>
+        <div class="terminal-panel__row">
+          <span class="terminal-panel__key">language</span>
+          <strong class="terminal-panel__value">{{ settings.llm_language }}</strong>
+        </div>
+        <div class="terminal-panel__row">
+          <span class="terminal-panel__key">sync_mode</span>
+          <strong class="terminal-panel__value">manual</strong>
+        </div>
+      </div>
+    </aside>
   </section>
 
   {% include "partials/alerts.html" %}
 
-  <section class="page-section dashboard-grid">
-    <article class="card">
-      <div class="card__header">
+  <section class="page-section dashboard-layout">
+    <article class="card card--feature">
+      <div class="section-heading">
         <div>
-          <p class="card__eyebrow">Intelligent Planning</p>
-          <h2 class="card__title">¿Qué debería hacer hoy?</h2>
+          <p class="card__eyebrow">Day Planner</p>
+          <h2 class="card__title">Plan táctico para hoy</h2>
+          <p class="card__description">
+            Genera una secuencia de ejecución con estimación de tiempo y balance cognitivo.
+          </p>
         </div>
       </div>
 
-      <p class="card__description">
-        Get an AI-optimized schedule with smart time estimation and cognitive load balancing.
-      </p>
-
-      <button
-        type="button"
-        class="button button--primary"
-        onclick="generateDayPlan()"
-        style="margin-bottom: 1rem;"
-      >
-        Generate day plan
-      </button>
+      <div class="card__actions">
+        <button
+          type="button"
+          class="button button--primary"
+          data-day-plan-trigger
+        >
+          Generar plan del día
+        </button>
+        <span class="status-badge status-badge--terminal">scheduler.ai</span>
+      </div>
 
       {% include "partials/day_plan.html" %}
     </article>
 
-    <article class="card card--compact">
-      <div class="card__header">
-        <div>
-          <p class="card__eyebrow">Connection</p>
-          <h2 class="card__title">Current configuration</h2>
+    <div class="dashboard-sidebar">
+      <article class="card card--compact">
+        <div class="section-heading section-heading--tight">
+          <div>
+            <p class="card__eyebrow">Connection Snapshot</p>
+            <h2 class="card__title">Runtime actual</h2>
+          </div>
         </div>
-      </div>
 
-      <dl class="details-list">
-        <div class="details-list__row">
-          <dt>Moodle URL</dt>
-          <dd>{{ settings.moodle_base_url }}</dd>
-        </div>
-        <div class="details-list__row">
-          <dt>Username</dt>
-          <dd>{{ settings.moodle_username }}</dd>
-        </div>
-        <div class="details-list__row">
-          <dt>LLM provider</dt>
-          <dd>{{ settings.llm_provider }}</dd>
-        </div>
-        <div class="details-list__row">
-          <dt>Model</dt>
-          <dd>{{ settings.llm_model }}</dd>
-        </div>
-      </dl>
-    </article>
+        <dl class="details-list">
+          <div class="details-list__row">
+            <dt>Moodle URL</dt>
+            <dd>{{ settings.moodle_base_url }}</dd>
+          </div>
+          <div class="details-list__row">
+            <dt>Usuario</dt>
+            <dd>{{ settings.moodle_username }}</dd>
+          </div>
+          <div class="details-list__row">
+            <dt>Proveedor</dt>
+            <dd>{{ settings.llm_provider }}</dd>
+          </div>
+          <div class="details-list__row">
+            <dt>Modelo</dt>
+            <dd>{{ settings.llm_model }}</dd>
+          </div>
+          <div class="details-list__row">
+            <dt>Idioma</dt>
+            <dd>{{ settings.llm_language }}</dd>
+          </div>
+        </dl>
+      </article>
 
-    <article class="card card--compact">
-      <div class="card__header">
-        <div>
-          <p class="card__eyebrow">Sync</p>
-          <h2 class="card__title">Manual refresh</h2>
+      <article class="card card--compact card--outlined">
+        <div class="section-heading section-heading--tight">
+          <div>
+            <p class="card__eyebrow">Manual Sync</p>
+            <h2 class="card__title">Control de actualización</h2>
+          </div>
         </div>
-      </div>
 
-      <p class="card__description">
-        Task synchronization only runs when you explicitly request it.
-      </p>
-
-      <form
-        method="post"
-        action="/sync"
-        class="stack"
-      >
-        <button
-          type="submit"
-          class="button button--primary"
-        >
-          Refresh tasks
-        </button>
-        <p class="helper-text">
-          Use demo mode immediately or save real credentials in Settings to pull
-          a live Moodle snapshot.
+        <p class="card__description">
+          La aplicación no sincroniza en segundo plano. Tú disparas cada refresh y mantienes control total del snapshot.
         </p>
-      </form>
-    </article>
+
+        <ul class="signal-list signal-list--compact">
+          <li>Modo demo disponible desde el primer arranque.</li>
+          <li>Con credenciales reales podrás extraer una vista viva de Moodle.</li>
+          <li>La ayuda AI trabaja sobre la instantánea actualmente cargada.</li>
+        </ul>
+      </article>
+    </div>
   </section>
 
   <section class="page-section">
-    <article class="card">
-      <div class="card__header card__header--split">
+    <article class="card card--task-board">
+      <div class="section-heading section-heading--split">
         <div>
-          <p class="card__eyebrow">Assignments</p>
-          <h2 class="card__title">Pending tasks</h2>
+          <p class="card__eyebrow">Assignments Queue</p>
+          <h2 class="card__title">Cola de tareas pendientes</h2>
+          <p class="card__description">
+            Priorizadas por urgencia para que identifiques rápido qué atacar primero.
+          </p>
         </div>
         <span class="status-badge status-badge--neutral">
           {% if last_sync_display %}
-            Last sync {{ last_sync_display }}
+            Snapshot {{ last_sync_display }}
           {% else %}
-            Not synced yet
+            Sin snapshot
           {% endif %}
         </span>
+      </div>
+
+      <div class="terminal-strip">
+        <span class="terminal-strip__label">queue.status</span>
+        <span class="terminal-strip__value">{{ tasks|length }} item(s) cargados</span>
       </div>
 
       {% include "partials/task_list.html" %}
@@ -124,19 +203,41 @@
 
   <section class="page-section">
     <article class="card">
-      <div class="card__header">
+      <div class="section-heading">
         <div>
-          <p class="card__eyebrow">AI help</p>
-          <h2 class="card__title">Task assistance workflow</h2>
+          <p class="card__eyebrow">Workflow</p>
+          <h2 class="card__title">Secuencia recomendada</h2>
+          <p class="card__description">
+            Un flujo simple para mantener el tablero limpio y usar la IA con intención.
+          </p>
         </div>
       </div>
 
-      <ol class="steps-list">
-        <li>Refresh your pending tasks from Moodle.</li>
-        <li>Select the assignment you want help with.</li>
-        <li>Request a clear checklist with actionable steps.</li>
-        <li>Follow the checklist and complete the task.</li>
-      </ol>
+      <div class="workflow-grid">
+        <article class="workflow-step">
+          <span class="workflow-step__index">01</span>
+          <h3 class="workflow-step__title">Sincroniza</h3>
+          <p class="workflow-step__description">Trae una instantánea fresca cuando estés listo para revisar tu carga.</p>
+        </article>
+
+        <article class="workflow-step">
+          <span class="workflow-step__index">02</span>
+          <h3 class="workflow-step__title">Prioriza</h3>
+          <p class="workflow-step__description">Escanea la cola y entra a la tarea que tenga más impacto inmediato.</p>
+        </article>
+
+        <article class="workflow-step">
+          <span class="workflow-step__index">03</span>
+          <h3 class="workflow-step__title">Desglosa</h3>
+          <p class="workflow-step__description">Pide a la IA una secuencia concreta, warnings y checklist final.</p>
+        </article>
+
+        <article class="workflow-step">
+          <span class="workflow-step__index">04</span>
+          <h3 class="workflow-step__title">Ejecuta</h3>
+          <p class="workflow-step__description">Trabaja sobre el blueprint y vuelve al tablero para seguir con la siguiente.</p>
+        </article>
+      </div>
     </article>
   </section>
 {% endblock %}

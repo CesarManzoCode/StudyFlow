@@ -1,98 +1,177 @@
 {% extends "base.html" %}
 
 {% block title %}{{ page_title }} · {{ app_name }}{% endblock %}
+{% block body_class %}app-body app-body--task{% endblock %}
 
 {% block content %}
   {% if task %}
-    <section class="page-section">
-      <div class="page-heading">
-        <div>
-          <p class="eyebrow">Task</p>
-          <h1 class="page-title">{{ task.title }}</h1>
-          <p class="page-description">
-            Review assignment details and request AI help only when needed.
-          </p>
+    <section class="page-section hero hero--detail">
+      <div class="hero__content">
+        <a
+          href="/"
+          class="back-link"
+        >
+          Volver al dashboard
+        </a>
+
+        <p class="eyebrow">Mission Node</p>
+        <h1 class="hero__title">{{ task.title }}</h1>
+        <p class="hero__description">
+          Inspecciona el encargo, revisa sus parámetros críticos y activa asistencia AI solo si la tarea lo requiere.
+        </p>
+
+        <div class="hero__badge-row">
+          <span class="status-badge status-badge--neutral">{{ task.status }}</span>
+          <span class="status-badge status-badge--terminal">{{ task.course_name }}</span>
+          <span class="status-badge {% if task.due_at %}status-badge--warning{% else %}status-badge--ghost{% endif %}">
+            {% if task.due_at %}
+              Entrega {{ task.due_at }}
+            {% else %}
+              Sin fecha límite
+            {% endif %}
+          </span>
+        </div>
+
+        <div class="hero__actions">
+          <a
+            href="{{ task.url }}"
+            target="_blank"
+            rel="noreferrer"
+            class="button button--primary"
+          >
+            Abrir en Moodle
+          </a>
+
+          <a
+            href="#ai-console"
+            class="button button--secondary"
+          >
+            Ir a asistencia AI
+          </a>
         </div>
       </div>
+
+      <aside class="hero__panel terminal-panel">
+        <div class="terminal-panel__header">
+          <span class="terminal-dot"></span>
+          <span>task.telemetry</span>
+        </div>
+
+        <div class="terminal-panel__body">
+          <div class="terminal-panel__row">
+            <span class="terminal-panel__key">task_id</span>
+            <strong class="terminal-panel__value">{{ task.id }}</strong>
+          </div>
+          <div class="terminal-panel__row">
+            <span class="terminal-panel__key">course</span>
+            <strong class="terminal-panel__value">{{ task.course_name }}</strong>
+          </div>
+          <div class="terminal-panel__row">
+            <span class="terminal-panel__key">status</span>
+            <strong class="terminal-panel__value">{{ task.status }}</strong>
+          </div>
+          <div class="terminal-panel__row">
+            <span class="terminal-panel__key">source</span>
+            <strong class="terminal-panel__value">moodle.live</strong>
+          </div>
+        </div>
+      </aside>
     </section>
 
     {% include "partials/alerts.html" %}
 
-    <section class="page-section">
+    <section class="page-section detail-layout">
       <article class="card">
-        <div class="card__header">
+        <div class="section-heading">
           <div>
             <p class="card__eyebrow">Details</p>
-            <h2 class="card__title">Assignment information</h2>
+            <h2 class="card__title">Parámetros del encargo</h2>
+            <p class="card__description">
+              Datos clave para decidir alcance, urgencia y punto de entrada.
+            </p>
           </div>
         </div>
 
         <dl class="details-list">
           <div class="details-list__row">
-            <dt>Course</dt>
+            <dt>Curso</dt>
             <dd>{{ task.course_name }}</dd>
           </div>
 
           <div class="details-list__row">
-            <dt>Status</dt>
+            <dt>Estado</dt>
             <dd>{{ task.status }}</dd>
           </div>
 
           <div class="details-list__row">
-            <dt>Due date</dt>
+            <dt>Entrega</dt>
             <dd>
               {% if task.due_at %}
                 {{ task.due_at }}
               {% else %}
-                Not defined
+                No definida
               {% endif %}
             </dd>
           </div>
 
           <div class="details-list__row">
-            <dt>Source</dt>
+            <dt>Fuente</dt>
             <dd>
-              <a href="{{ task.url }}" target="_blank" rel="noreferrer">
-                Open Moodle task
+              <a
+                href="{{ task.url }}"
+                target="_blank"
+                rel="noreferrer"
+                class="inline-link"
+              >
+                Abrir tarea en Moodle
               </a>
             </dd>
           </div>
         </dl>
       </article>
-    </section>
 
-    <section class="page-section">
       <article class="card">
-        <div class="card__header">
+        <div class="section-heading">
           <div>
-            <p class="card__eyebrow">Description</p>
-            <h2 class="card__title">Task instructions</h2>
+            <p class="card__eyebrow">Briefing</p>
+            <h2 class="card__title">Instrucciones de la tarea</h2>
+            <p class="card__description">
+              Contexto textual crudo para que puedas leerlo sin salir de la consola.
+            </p>
           </div>
         </div>
 
-        <div class="card__description">
+        <div class="prose-block prose-block--terminal">
           {% if task.description_text %}
             {{ task.description_text }}
           {% else %}
-            <p class="helper-text">No description available.</p>
+            <p class="helper-text">No hay descripción disponible.</p>
           {% endif %}
         </div>
       </article>
     </section>
 
-    <section class="page-section">
+    <section
+      class="page-section"
+      id="ai-console"
+    >
       {% include "partials/ai_panel.html" %}
     </section>
   {% else %}
-    <section class="page-section">
-      <div class="page-heading">
-        <div>
-          <p class="eyebrow">Task</p>
-          <h1 class="page-title">Task not found</h1>
-          <p class="page-description">
-            Synchronize tasks again and retry opening the assignment detail page.
-          </p>
-        </div>
+    <section class="page-section hero hero--detail hero--empty">
+      <div class="hero__content">
+        <a
+          href="/"
+          class="back-link"
+        >
+          Volver al dashboard
+        </a>
+
+        <p class="eyebrow">Task Node</p>
+        <h1 class="hero__title">La tarea no está disponible</h1>
+        <p class="hero__description">
+          Vuelve a sincronizar el snapshot y prueba otra vez entrando desde la cola principal.
+        </p>
       </div>
     </section>
 
@@ -101,9 +180,9 @@
     <section class="page-section">
       <article class="card">
         <div class="empty-state">
-          <h2 class="empty-state__title">This task is not available right now</h2>
+          <h2 class="empty-state__title">No se encontró este nodo de tarea</h2>
           <p class="empty-state__description">
-            Return to the dashboard, refresh the task snapshot, and try again.
+            Regresa al dashboard, refresca el snapshot y vuelve a abrir la tarea desde la lista.
           </p>
         </div>
       </article>

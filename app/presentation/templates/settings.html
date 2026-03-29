@@ -1,169 +1,248 @@
 {% extends "base.html" %}
 
 {% block title %}{{ page_title }} · {{ app_name }}{% endblock %}
+{% block body_class %}app-body app-body--settings{% endblock %}
 
 {% block content %}
-  <section class="page-section">
-    <div class="page-heading">
-      <div>
-        <p class="eyebrow">Settings</p>
-        <h1 class="page-title">Connection and provider setup</h1>
-        <p class="page-description">
-          Save live Moodle and LLM credentials here. The application container is
-          rebuilt automatically after each successful save.
-        </p>
+  <section class="page-section hero hero--settings">
+    <div class="hero__content">
+      <p class="eyebrow">Runtime Config</p>
+      <h1 class="hero__title">Afina conexiones, credenciales y motor AI desde una sola consola.</h1>
+      <p class="hero__description">
+        Guarda configuración de Moodle y del proveedor LLM. Cada guardado exitoso recompone el contenedor automáticamente.
+      </p>
+
+      <div class="hero__badge-row">
+        <span class="status-badge status-badge--terminal">{{ settings.llm_provider }}</span>
+        <span class="status-badge status-badge--neutral">{{ settings.llm_model }}</span>
+        <span class="status-badge status-badge--ghost">{{ settings.llm_language }}</span>
       </div>
     </div>
+
+    <aside class="hero__panel terminal-panel">
+      <div class="terminal-panel__header">
+        <span class="terminal-dot"></span>
+        <span>runtime.profile</span>
+      </div>
+
+      <div class="terminal-panel__body">
+        <div class="terminal-panel__row">
+          <span class="terminal-panel__key">provider</span>
+          <strong class="terminal-panel__value">{{ settings.llm_provider }}</strong>
+        </div>
+        <div class="terminal-panel__row">
+          <span class="terminal-panel__key">model</span>
+          <strong class="terminal-panel__value">{{ settings.llm_model }}</strong>
+        </div>
+        <div class="terminal-panel__row">
+          <span class="terminal-panel__key">language</span>
+          <strong class="terminal-panel__value">{{ settings.llm_language }}</strong>
+        </div>
+        <div class="terminal-panel__row">
+          <span class="terminal-panel__key">reload</span>
+          <strong class="terminal-panel__value">auto after save</strong>
+        </div>
+      </div>
+    </aside>
   </section>
 
   {% include "partials/alerts.html" %}
 
-  <section class="page-section dashboard-grid">
-    <article class="card">
-      <div class="card__header">
+  <section class="page-section settings-layout">
+    <article class="card card--form-shell">
+      <div class="section-heading">
         <div>
-          <p class="card__eyebrow">Edit</p>
-          <h2 class="card__title">Application settings</h2>
+          <p class="card__eyebrow">Edit Runtime</p>
+          <h2 class="card__title">Parámetros de la aplicación</h2>
+          <p class="card__description">
+            Ajusta acceso a Moodle y proveedor AI sin tocar el backend.
+          </p>
         </div>
       </div>
 
       <form
         method="post"
         action="/settings"
-        class="stack"
+        class="settings-form"
       >
-        <label class="stack">
-          <span>Moodle base URL</span>
-          <input
-            type="url"
-            name="moodle_base_url"
-            value="{{ settings.moodle_base_url }}"
-            required
-          />
-        </label>
+        <section class="form-section">
+          <div class="form-section__header">
+            <p class="card__eyebrow">Moodle Access</p>
+            <h3 class="form-section__title">Credenciales de plataforma</h3>
+          </div>
 
-        <label class="stack">
-          <span>Moodle username</span>
-          <input
-            type="text"
-            name="moodle_username"
-            value="{{ settings.moodle_username }}"
-            required
-          />
-        </label>
+          <div class="form-grid">
+            <label class="field field--span-2">
+              <span class="field__label">Moodle base URL</span>
+              <input
+                type="url"
+                name="moodle_base_url"
+                value="{{ settings.moodle_base_url }}"
+                class="input"
+                required
+              />
+            </label>
 
-        <label class="stack">
-          <span>Moodle password</span>
-          <input
-            type="password"
-            name="moodle_password"
-            value=""
-            placeholder="Leave blank to keep current password"
-            autocomplete="current-password"
-          />
-        </label>
+            <label class="field">
+              <span class="field__label">Moodle username</span>
+              <input
+                type="text"
+                name="moodle_username"
+                value="{{ settings.moodle_username }}"
+                class="input"
+                required
+              />
+            </label>
 
-        <label class="stack">
-          <span>LLM provider</span>
-          <select
-            name="llm_provider"
-            required
-          >
-            {% for provider in ["ollama", "openai", "groq", "anthropic"] %}
-              <option
-                value="{{ provider }}"
-                {% if settings.llm_provider == provider %}selected{% endif %}
+            <label class="field">
+              <span class="field__label">Moodle password</span>
+              <input
+                type="password"
+                name="moodle_password"
+                value=""
+                placeholder="Déjalo vacío para conservar la actual"
+                autocomplete="current-password"
+                class="input"
+              />
+            </label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <div class="form-section__header">
+            <p class="card__eyebrow">AI Runtime</p>
+            <h3 class="form-section__title">Proveedor y modelo</h3>
+          </div>
+
+          <div class="form-grid">
+            <label class="field">
+              <span class="field__label">LLM provider</span>
+              <select
+                name="llm_provider"
+                class="input"
+                required
               >
-                {{ provider }}
-              </option>
-            {% endfor %}
-          </select>
-        </label>
+                {% for provider in ["ollama", "openai", "groq", "anthropic"] %}
+                  <option
+                    value="{{ provider }}"
+                    {% if settings.llm_provider == provider %}selected{% endif %}
+                  >
+                    {{ provider }}
+                  </option>
+                {% endfor %}
+              </select>
+            </label>
 
-        <label class="stack">
-          <span>LLM model</span>
-          <input
-            type="text"
-            name="llm_model"
-            value="{{ settings.llm_model }}"
-            required
-          />
-        </label>
+            <label class="field">
+              <span class="field__label">LLM model</span>
+              <input
+                type="text"
+                name="llm_model"
+                value="{{ settings.llm_model }}"
+                class="input"
+                required
+              />
+            </label>
 
-        <label class="stack">
-          <span>LLM language</span>
-          <input
-            type="text"
-            name="llm_language"
-            value="{{ settings.llm_language }}"
-            placeholder="Spanish"
-            required
-          />
-        </label>
+            <label class="field">
+              <span class="field__label">LLM language</span>
+              <input
+                type="text"
+                name="llm_language"
+                value="{{ settings.llm_language }}"
+                placeholder="Spanish"
+                class="input"
+                required
+              />
+            </label>
 
-        <label class="stack">
-          <span>LLM API key</span>
-          <input
-            type="password"
-            name="llm_api_key"
-            value=""
-            placeholder="Leave blank to keep current API key"
-            autocomplete="off"
-          />
-        </label>
+            <label class="field">
+              <span class="field__label">LLM base URL</span>
+              <input
+                type="url"
+                name="llm_base_url"
+                value="{{ settings.llm_base_url }}"
+                class="input"
+              />
+            </label>
 
-        <label class="stack">
-          <span>LLM base URL</span>
-          <input
-            type="url"
-            name="llm_base_url"
-            value="{{ settings.llm_base_url }}"
-          />
-        </label>
+            <label class="field field--span-2">
+              <span class="field__label">LLM API key</span>
+              <input
+                type="password"
+                name="llm_api_key"
+                value=""
+                placeholder="Déjalo vacío para conservar la actual"
+                autocomplete="off"
+                class="input"
+              />
+            </label>
+          </div>
+        </section>
 
-        <button
-          type="submit"
-          class="button button--primary"
-        >
-          Save settings
-        </button>
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="button button--primary"
+          >
+            Guardar configuración
+          </button>
+          <p class="helper-text">Después de guardar, el contenedor se recarga automáticamente.</p>
+        </div>
       </form>
     </article>
 
-    <article class="card card--compact">
-      <div class="card__header">
-        <div>
-          <p class="card__eyebrow">Current</p>
-          <h2 class="card__title">Saved configuration snapshot</h2>
+    <div class="settings-sidebar">
+      <article class="card card--compact">
+        <div class="section-heading section-heading--tight">
+          <div>
+            <p class="card__eyebrow">Current Snapshot</p>
+            <h2 class="card__title">Configuración guardada</h2>
+          </div>
         </div>
-      </div>
 
-      <dl class="details-list">
-        <div class="details-list__row">
-          <dt>Moodle URL</dt>
-          <dd>{{ settings.moodle_base_url }}</dd>
+        <dl class="details-list">
+          <div class="details-list__row">
+            <dt>Moodle URL</dt>
+            <dd>{{ settings.moodle_base_url }}</dd>
+          </div>
+          <div class="details-list__row">
+            <dt>Usuario</dt>
+            <dd>{{ settings.moodle_username }}</dd>
+          </div>
+          <div class="details-list__row">
+            <dt>Headless</dt>
+            <dd>{{ settings.moodle_headless }}</dd>
+          </div>
+          <div class="details-list__row">
+            <dt>Proveedor</dt>
+            <dd>{{ settings.llm_provider }}</dd>
+          </div>
+          <div class="details-list__row">
+            <dt>Modelo</dt>
+            <dd>{{ settings.llm_model }}</dd>
+          </div>
+          <div class="details-list__row">
+            <dt>Idioma</dt>
+            <dd>{{ settings.llm_language }}</dd>
+          </div>
+        </dl>
+      </article>
+
+      <article class="card card--compact card--outlined">
+        <div class="section-heading section-heading--tight">
+          <div>
+            <p class="card__eyebrow">Operational Notes</p>
+            <h2 class="card__title">Buenas prácticas</h2>
+          </div>
         </div>
-        <div class="details-list__row">
-          <dt>Username</dt>
-          <dd>{{ settings.moodle_username }}</dd>
-        </div>
-        <div class="details-list__row">
-          <dt>Headless</dt>
-          <dd>{{ settings.moodle_headless }}</dd>
-        </div>
-        <div class="details-list__row">
-          <dt>Provider</dt>
-          <dd>{{ settings.llm_provider }}</dd>
-        </div>
-        <div class="details-list__row">
-          <dt>Model</dt>
-          <dd>{{ settings.llm_model }}</dd>
-        </div>
-        <div class="details-list__row">
-          <dt>Language</dt>
-          <dd>{{ settings.llm_language }}</dd>
-        </div>
-      </dl>
-    </article>
+
+        <ul class="signal-list signal-list--compact">
+          <li>Usa una URL base limpia para evitar fallos en scraping o navegación.</li>
+          <li>Valida modelo y proveedor antes de guardar cambios más grandes.</li>
+          <li>Si cambias credenciales, el runtime se recompone al finalizar el guardado.</li>
+        </ul>
+      </article>
+    </div>
   </section>
 {% endblock %}

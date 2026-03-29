@@ -1,23 +1,26 @@
 {% if success %}
   <section class="page-section">
-    <article class="card">
-      <p class="card__description"><strong>Success:</strong> {{ success }}</p>
+    <article class="alert alert--success">
+      <p class="alert__eyebrow">Success</p>
+      <p class="alert__message">{{ success }}</p>
     </article>
   </section>
 {% endif %}
 
 {% if error %}
   <section class="page-section">
-    <article class="card">
-      <p class="card__description"><strong>Error:</strong> {{ error }}</p>
+    <article class="alert alert--error">
+      <p class="alert__eyebrow">Error</p>
+      <p class="alert__message">{{ error }}</p>
     </article>
   </section>
 {% endif %}
 
 {% if info %}
   <section class="page-section">
-    <article class="card">
-      <p class="card__description"><strong>Info:</strong> {{ info }}</p>
+    <article class="alert alert--info">
+      <p class="alert__eyebrow">Info</p>
+      <p class="alert__message">{{ info }}</p>
     </article>
   </section>
 {% endif %}

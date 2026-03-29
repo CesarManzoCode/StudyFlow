@@ -1,31 +1,45 @@
-<article class="card task-card priority-{{ task.priority.value }}">
-  <a href="/tasks/{{ task.task.id }}" class="task-card__link">
-
-    <div class="task-card__header">
-      <div class="task-card__title">
-        {{ task.task.title }}
-      </div>
-
-      <span class="priority-badge priority-badge--{{ task.priority.value }}">
-        {{ task.priority.value }}
+<article class="task-card task-card--{{ task.priority.value }}">
+  <a
+    href="/tasks/{{ task.task.id }}"
+    class="task-card__link"
+  >
+    <div class="task-card__topline">
+      <span class="task-card__index">
+        {% if loop is defined %}
+          {{ "%02d"|format(loop.index) }}
+        {% else %}
+          00
+        {% endif %}
       </span>
+
+      <div class="task-card__signals">
+        <span class="priority-badge priority-badge--{{ task.priority.value }}">
+          {{ task.priority.value }}
+        </span>
+        <span class="task-card__status">{{ task.task.status }}</span>
+      </div>
     </div>
 
-    <div class="task-card__meta">
-      <span class="task-card__course">
-        {{ task.task.course_name }}
-      </span>
+    <h3 class="task-card__title">
+      {{ task.task.title }}
+    </h3>
 
+    <p class="task-card__course">
+      {{ task.task.course_name }}
+    </p>
+
+    <div class="task-card__footer">
       {% if task.task.due_at %}
         <span class="task-card__due">
-          ⏰ {{ task.task.due_at }}
+          Deadline {{ task.task.due_at }}
         </span>
       {% else %}
         <span class="task-card__due task-card__due--none">
-          Sin fecha
+          Sin fecha límite
         </span>
       {% endif %}
-    </div>
 
+      <span class="task-card__cta">Abrir nodo</span>
+    </div>
   </a>
 </article>

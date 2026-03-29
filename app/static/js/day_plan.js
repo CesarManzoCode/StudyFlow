@@ -1,7 +1,7 @@
 /**
  * Generate and display day plan
  */
-async function generateDayPlan() {
+async function generateDayPlan(triggerButton) {
   const container = document.getElementById('day-plan-container');
   const loading = document.getElementById('day-plan-loading');
   const error = document.getElementById('day-plan-error');
@@ -9,14 +9,24 @@ async function generateDayPlan() {
   const result = document.getElementById('day-plan-result');
   const noTasks = document.getElementById('no-tasks-message');
   const plannedTasks = document.getElementById('planned-tasks');
+  const button = triggerButton || document.querySelector('[data-day-plan-trigger]');
 
-  // Show loading state
-  loading.style.display = 'block';
-  error.style.display = 'none';
-  result.style.display = 'none';
+  if (!container || !loading || !error || !errorMsg || !result || !noTasks || !plannedTasks) {
+    return;
+  }
+
+  setHidden(loading, false);
+  setHidden(error, true);
+  setHidden(result, true);
+  setHidden(noTasks, true);
+
+  if (button) {
+    button.disabled = true;
+    button.dataset.originalLabel = button.dataset.originalLabel || button.textContent.trim();
+    button.textContent = 'Calculando plan...';
+  }
 
   try {
-    // Call the API
     const response = await fetch('/api/plan/my-day');
 
     if (!response.ok) {
@@ -25,41 +35,38 @@ async function generateDayPlan() {
 
     const plan = await response.json();
 
-    // Clear previous results
     plannedTasks.innerHTML = '';
 
-    // Update summary stats
-    document.getElementById('plan-total-hours').textContent = 
+    document.getElementById('plan-total-hours').textContent =
       plan.total_hours > 0 ? `${plan.total_hours}h` : '0h';
-    document.getElementById('plan-task-count').textContent = 
+    document.getElementById('plan-task-count').textContent =
       plan.planned_tasks.length;
-    document.getElementById('plan-feasible').textContent = 
-      plan.is_feasible ? '✓ Yes' : '✗ No';
-    document.getElementById('plan-balance').textContent = 
+    document.getElementById('plan-feasible').textContent =
+      plan.is_feasible ? 'Yes' : 'No';
+    document.getElementById('plan-balance').textContent =
       plan.cognitive_balance || 'balanced';
 
-    // Render tasks or empty state
     if (plan.planned_tasks.length === 0) {
-      noTasks.style.display = 'block';
+      setHidden(noTasks, false);
     } else {
-      noTasks.style.display = 'none';
-
-      // Render each task
       plan.planned_tasks.forEach((task) => {
         const taskEl = createTaskElement(task);
         plannedTasks.appendChild(taskEl);
       });
     }
 
-    // Show results
-    loading.style.display = 'none';
-    result.style.display = 'block';
-
+    setHidden(loading, true);
+    setHidden(result, false);
   } catch (err) {
     console.error('Error generating day plan:', err);
-    errorMsg.textContent = `Failed to generate plan: ${err.message}`;
-    loading.style.display = 'none';
-    error.style.display = 'block';
+    errorMsg.textContent = `No fue posible generar el plan: ${err.message}`;
+    setHidden(loading, true);
+    setHidden(error, false);
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = button.dataset.originalLabel || 'Generar plan del dia';
+    }
   }
 }
 
@@ -74,17 +81,20 @@ function createTaskElement(task) {
   const loadClass = `task-badge--load-${task.cognitive_load}`;
 
   div.innerHTML = `
-    <div class="task-sequence">${task.sequence_position}</div>
-    <div class="task-content">
-      <p class="task-title">${escapeHtml(task.title)}</p>
-      <p class="task-course">${escapeHtml(task.course_name)}</p>
-      <div class="task-meta">
-        <span class="task-badge task-badge--time">⏱ ${task.formatted_time_block}</span>
+    <div class="planned-task__sequence">${escapeHtml(String(task.sequence_position))}</div>
+    <div class="planned-task__content">
+      <div class="planned-task__header">
+        <p class="planned-task__title">${escapeHtml(task.title)}</p>
+        <span class="planned-task__time">${escapeHtml(task.formatted_time_block)}</span>
+      </div>
+      <p class="planned-task__course">${escapeHtml(task.course_name)}</p>
+      <div class="planned-task__meta">
+        <span class="task-badge task-badge--time">⏱ ${escapeHtml(task.formatted_time_block)}</span>
         <span class="task-badge ${difficultyClass}">
-          Difficulty: ${task.difficulty}
+          Difficulty: ${escapeHtml(task.difficulty)}
         </span>
         <span class="task-badge ${loadClass}">
-          Load: ${task.cognitive_load}
+          Load: ${escapeHtml(task.cognitive_load)}
         </span>
       </div>
     </div>
@@ -97,6 +107,7 @@ function createTaskElement(task) {
  * Escape HTML special characters
  */
 function escapeHtml(text) {
+  const safeText = String(text ?? '');
   const map = {
     '&': '&amp;',
     '<': '&lt;',
@@ -104,8 +115,25 @@ function escapeHtml(text) {
     '"': '&quot;',
     "'": '&#039;'
   };
-  return text.replace(/[&<>"']/g, m => map[m]);
+  return safeText.replace(/[&<>"']/g, m => map[m]);
 }
 
-// Export for use in HTML
+function setHidden(element, hidden) {
+  if (element) {
+    element.hidden = hidden;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const trigger = document.querySelector('[data-day-plan-trigger]');
+
+  if (!trigger) {
+    return;
+  }
+
+  trigger.addEventListener('click', () => {
+    generateDayPlan(trigger);
+  });
+});
+
 window.generateDayPlan = generateDayPlan;

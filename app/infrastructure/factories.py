@@ -25,6 +25,7 @@ from app.config import Settings, get_settings
 from app.domain.enums import TaskStatus
 from app.domain.models.checklist import ChecklistResponse
 from app.domain.models.task import Task
+from app.domain.models.task_step import EnhancedChecklistResponse, StepDifficulty, TaskStep
 from app.domain.ports.llm_client import LlmClient
 from app.domain.ports.moodle_client import MoodleClient
 from app.domain.ports.state_repository import StateRepository
@@ -387,4 +388,30 @@ class _DemoLlmClient(LlmClient):
                 "I completed the work and proofread it once.",
                 "I verified the final output matches the assignment instructions.",
             ],
+        )
+
+    async def generate_enhanced_checklist(
+        self,
+        task: Task,
+        user_question: str | None = None,
+    ) -> EnhancedChecklistResponse:
+        """Return demo enhanced output with explicit step metadata."""
+        base = await self.generate_checklist(task=task, user_question=user_question)
+        steps = [
+            TaskStep(
+                description=step,
+                estimated_minutes=3 if idx == 0 else 8,
+                difficulty=StepDifficulty.EASY if idx == 0 else StepDifficulty.MODERATE,
+                is_minimal_first_step=idx == 0,
+            )
+            for idx, step in enumerate(base.steps)
+        ]
+
+        return EnhancedChecklistResponse(
+            summary=base.summary,
+            deliverable=base.deliverable,
+            steps=steps,
+            warnings=base.warnings,
+            questions_to_clarify=base.questions_to_clarify,
+            final_checklist=base.final_checklist,
         )

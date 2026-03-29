@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock
 from fastapi.testclient import TestClient
 
-from app.domain.models.checklist import ChecklistResponse
+from app.domain.models.task_step import EnhancedChecklistResponse, StepDifficulty, TaskStep
 from app.main import app
 
 
@@ -21,7 +21,7 @@ def mock_container(monkeypatch):
     """Mock the application container."""
     mock_container = MagicMock()
     mock_execute = AsyncMock()
-    mock_container.generate_task_help.execute = mock_execute
+    mock_container.generate_task_help.execute_enhanced = mock_execute
     
     # Patch the container in app state
     app.state.container = mock_container
@@ -35,19 +35,34 @@ class TestEnhancedTaskHelp:
         """Test successful retrieval of enhanced task help."""
         # Arrange
         task_id = "task-123"
-        mock_checklist = ChecklistResponse(
+        mock_checklist = EnhancedChecklistResponse(
             summary="Write an introduction",
             deliverable="Introduction section complete",
             steps=[
-                "Open document",
-                "Write introduction paragraph",
-                "Review introduction"
+                TaskStep(
+                    description="Open document",
+                    estimated_minutes=2,
+                    difficulty=StepDifficulty.EASY,
+                    is_minimal_first_step=True,
+                ),
+                TaskStep(
+                    description="Write introduction paragraph",
+                    estimated_minutes=15,
+                    difficulty=StepDifficulty.MODERATE,
+                    is_minimal_first_step=False,
+                ),
+                TaskStep(
+                    description="Review introduction",
+                    estimated_minutes=5,
+                    difficulty=StepDifficulty.EASY,
+                    is_minimal_first_step=False,
+                ),
             ],
             warnings=[],
             questions_to_clarify=[],
             final_checklist=["Intro done"]
         )
-        mock_container.generate_task_help.execute.return_value = mock_checklist
+        mock_container.generate_task_help.execute_enhanced.return_value = mock_checklist
         
         # Act
         response = client.post(f"/api/tasks/{task_id}/help/enhanced")
@@ -59,7 +74,7 @@ class TestEnhancedTaskHelp:
         assert data["summary"] == "Write an introduction"
         assert data["deliverable"] == "Introduction section complete"
         assert len(data["steps"]) == 3
-        assert data["total_estimated_minutes"] > 0
+        assert data["total_estimated_minutes"] == 22
         assert data["has_minimal_first_step"] is True
         assert data["minimal_first_step"] is not None
 
@@ -68,15 +83,28 @@ class TestEnhancedTaskHelp:
         # Arrange
         task_id = "task-456"
         user_question = "How do I structure this?"
-        mock_checklist = ChecklistResponse(
+        mock_checklist = EnhancedChecklistResponse(
             summary="Structure guide",
             deliverable="Structure completed",
-            steps=["Read examples", "Create outline"],
+            steps=[
+                TaskStep(
+                    description="Read examples",
+                    estimated_minutes=6,
+                    difficulty=StepDifficulty.EASY,
+                    is_minimal_first_step=True,
+                ),
+                TaskStep(
+                    description="Create outline",
+                    estimated_minutes=12,
+                    difficulty=StepDifficulty.MODERATE,
+                    is_minimal_first_step=False,
+                ),
+            ],
             warnings=[],
             questions_to_clarify=[],
             final_checklist=[]
         )
-        mock_container.generate_task_help.execute.return_value = mock_checklist
+        mock_container.generate_task_help.execute_enhanced.return_value = mock_checklist
         
         # Act
         response = client.post(
@@ -86,7 +114,7 @@ class TestEnhancedTaskHelp:
         
         # Assert
         assert response.status_code == 200
-        mock_container.generate_task_help.execute.assert_called_once_with(
+        mock_container.generate_task_help.execute_enhanced.assert_called_once_with(
             task_id=task_id,
             user_question=user_question,
         )
@@ -94,19 +122,34 @@ class TestEnhancedTaskHelp:
     def test_step_effort_indicators(self, client, mock_container):
         """Test that step difficulty indicators are properly assigned."""
         # Arrange
-        mock_checklist = ChecklistResponse(
+        mock_checklist = EnhancedChecklistResponse(
             summary="Task",
             deliverable="Done",
             steps=[
-                "Open the file",  # Should be TRIVIAL
-                "Write the content",  # Should be MODERATE
-                "Review the work",  # Should be EASY
+                TaskStep(
+                    description="Open the file",
+                    estimated_minutes=1,
+                    difficulty=StepDifficulty.TRIVIAL,
+                    is_minimal_first_step=True,
+                ),
+                TaskStep(
+                    description="Write the content",
+                    estimated_minutes=12,
+                    difficulty=StepDifficulty.MODERATE,
+                    is_minimal_first_step=False,
+                ),
+                TaskStep(
+                    description="Review the work",
+                    estimated_minutes=4,
+                    difficulty=StepDifficulty.EASY,
+                    is_minimal_first_step=False,
+                ),
             ],
             warnings=[],
             questions_to_clarify=[],
             final_checklist=[]
         )
-        mock_container.generate_task_help.execute.return_value = mock_checklist
+        mock_container.generate_task_help.execute_enhanced.return_value = mock_checklist
         
         # Act
         response = client.post("/api/tasks/task-789/help/enhanced")
@@ -134,19 +177,34 @@ class TestEnhancedTaskHelp:
     def test_total_time_calculation(self, client, mock_container):
         """Test that total estimated minutes is calculated correctly."""
         # Arrange
-        mock_checklist = ChecklistResponse(
+        mock_checklist = EnhancedChecklistResponse(
             summary="Task",
             deliverable="Done",
             steps=[
-                "Click button",  # ~1 min
-                "Write paragraph",  # ~10 min
-                "Save file",  # ~1 min
+                TaskStep(
+                    description="Click button",
+                    estimated_minutes=1,
+                    difficulty=StepDifficulty.TRIVIAL,
+                    is_minimal_first_step=True,
+                ),
+                TaskStep(
+                    description="Write paragraph",
+                    estimated_minutes=10,
+                    difficulty=StepDifficulty.MODERATE,
+                    is_minimal_first_step=False,
+                ),
+                TaskStep(
+                    description="Save file",
+                    estimated_minutes=1,
+                    difficulty=StepDifficulty.TRIVIAL,
+                    is_minimal_first_step=False,
+                ),
             ],
             warnings=[],
             questions_to_clarify=[],
             final_checklist=[]
         )
-        mock_container.generate_task_help.execute.return_value = mock_checklist
+        mock_container.generate_task_help.execute_enhanced.return_value = mock_checklist
         
         # Act
         response = client.post("/api/tasks/task-time/help/enhanced")
@@ -157,13 +215,12 @@ class TestEnhancedTaskHelp:
         
         # Total should be sum of all steps
         total = data["total_estimated_minutes"]
-        assert total > 0
-        assert total <= 120  # Max reasonable for compound steps
+        assert total == 12
 
     def test_empty_steps_list(self, client, mock_container):
         """Test handling of empty steps list."""
         # Arrange
-        mock_checklist = ChecklistResponse(
+        mock_checklist = EnhancedChecklistResponse(
             summary="No steps",
             deliverable="Done",
             steps=[],
@@ -171,7 +228,7 @@ class TestEnhancedTaskHelp:
             questions_to_clarify=[],
             final_checklist=[]
         )
-        mock_container.generate_task_help.execute.return_value = mock_checklist
+        mock_container.generate_task_help.execute_enhanced.return_value = mock_checklist
         
         # Act
         response = client.post("/api/tasks/task-empty/help/enhanced")
@@ -187,19 +244,34 @@ class TestEnhancedTaskHelp:
     def test_minimal_first_step_always_first(self, client, mock_container):
         """Test that minimal_first_step is always the first step."""
         # Arrange
-        mock_checklist = ChecklistResponse(
+        mock_checklist = EnhancedChecklistResponse(
             summary="Multi-step task",
             deliverable="Complete",
             steps=[
-                "Initial setup (trivial)",
-                "Main work (hard)",
-                "Final review (easy)",
+                TaskStep(
+                    description="Initial setup (trivial)",
+                    estimated_minutes=2,
+                    difficulty=StepDifficulty.EASY,
+                    is_minimal_first_step=True,
+                ),
+                TaskStep(
+                    description="Main work (hard)",
+                    estimated_minutes=25,
+                    difficulty=StepDifficulty.HARD,
+                    is_minimal_first_step=False,
+                ),
+                TaskStep(
+                    description="Final review (easy)",
+                    estimated_minutes=6,
+                    difficulty=StepDifficulty.EASY,
+                    is_minimal_first_step=False,
+                ),
             ],
             warnings=[],
             questions_to_clarify=[],
             final_checklist=[]
         )
-        mock_container.generate_task_help.execute.return_value = mock_checklist
+        mock_container.generate_task_help.execute_enhanced.return_value = mock_checklist
         
         # Act
         response = client.post("/api/tasks/task-multi/help/enhanced")
@@ -219,15 +291,28 @@ class TestEnhancedTaskHelp:
     def test_response_model_completeness(self, client, mock_container):
         """Test that response includes all required fields."""
         # Arrange
-        mock_checklist = ChecklistResponse(
+        mock_checklist = EnhancedChecklistResponse(
             summary="Complete task",
             deliverable="All done",
-            steps=["Step 1", "Step 2"],
+            steps=[
+                TaskStep(
+                    description="Step 1",
+                    estimated_minutes=3,
+                    difficulty=StepDifficulty.EASY,
+                    is_minimal_first_step=True,
+                ),
+                TaskStep(
+                    description="Step 2",
+                    estimated_minutes=9,
+                    difficulty=StepDifficulty.MODERATE,
+                    is_minimal_first_step=False,
+                ),
+            ],
             warnings=["Be careful"],
             questions_to_clarify=["What about X?"],
             final_checklist=["Item 1"]
         )
-        mock_container.generate_task_help.execute.return_value = mock_checklist
+        mock_container.generate_task_help.execute_enhanced.return_value = mock_checklist
         
         # Act
         response = client.post("/api/tasks/task-full/help/enhanced")

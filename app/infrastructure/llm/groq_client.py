@@ -7,8 +7,13 @@ from openai import APIConnectionError, APIError, APITimeoutError, AsyncOpenAI, R
 from app.domain.exceptions import InvalidLlmResponseError, LlmProviderError
 from app.domain.models.checklist import ChecklistResponse
 from app.domain.models.task import Task
+from app.domain.models.task_step import EnhancedChecklistResponse
 from app.domain.ports.llm_client import LlmClient
-from app.infrastructure.llm.schemas import ChecklistPayload
+from app.infrastructure.llm.schemas import (
+    ChecklistPayload,
+    EnhancedChecklistPayload,
+    fallback_enhanced_from_checklist,
+)
 
 
 class GroqClient(LlmClient):
@@ -114,6 +119,41 @@ class GroqClient(LlmClient):
         except Exception as exc:
             msg = "Groq response could not be validated as a checklist payload."
             raise InvalidLlmResponseError(msg) from exc
+
+        return validated_payload.to_domain()
+
+    async def generate_enhanced_checklist(
+        self,
+        task: Task,
+        user_question: str | None = None,
+    ) -> EnhancedChecklistResponse:
+        """Generate checklist with LLM-provided step metadata."""
+        prompt = self._build_prompt(task=task, user_question=user_question)
+
+        try:
+            response = await self._client.responses.create(
+                model=self._model,
+                input=prompt,
+                text={
+                    "format": {
+                        "type": "json_schema",
+                        "name": "enhanced_checklist_payload",
+                        "strict": True,
+                        "schema": EnhancedChecklistPayload.openai_response_schema(),
+                    }
+                },
+            )
+        except Exception:
+            checklist = await self.generate_checklist(task=task, user_question=user_question)
+            return fallback_enhanced_from_checklist(checklist)
+
+        content = self._extract_output_text(response)
+
+        try:
+            validated_payload = EnhancedChecklistPayload.model_validate_json(content)
+        except Exception:
+            checklist = await self.generate_checklist(task=task, user_question=user_question)
+            return fallback_enhanced_from_checklist(checklist)
 
         return validated_payload.to_domain()
 

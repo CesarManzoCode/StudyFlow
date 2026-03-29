@@ -1,5 +1,6 @@
 from app.application.services.prompt_builder import PromptBuilder
 from app.domain.models.checklist import ChecklistResponse
+from app.domain.models.task_step import EnhancedChecklistResponse
 from app.domain.ports.llm_client import LlmClient
 from app.domain.ports.moodle_client import MoodleClient
 from app.domain.ports.task_repository import TaskRepository
@@ -62,6 +63,28 @@ class GenerateTaskHelpUseCase:
         )
 
         return await self._llm_client.generate_checklist(
+            task=refreshed_task,
+            user_question=prompt,
+        )
+
+    async def execute_enhanced(
+        self,
+        task_id: str,
+        user_question: str | None = None,
+    ) -> EnhancedChecklistResponse:
+        """
+        Generate enhanced structured help with per-step effort metadata.
+        """
+        task = await self._get_existing_task(task_id=task_id)
+        refreshed_task = await self._moodle_client.fetch_task_detail(task.url)
+
+        prompt = self._prompt_builder.build_task_help_prompt(
+            task=refreshed_task,
+            user_question=user_question,
+            include_step_metadata=True,
+        )
+
+        return await self._llm_client.generate_enhanced_checklist(
             task=refreshed_task,
             user_question=prompt,
         )

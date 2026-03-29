@@ -16,6 +16,7 @@ from app.domain.models.day_plan import (
     TaskDifficulty,
 )
 from app.domain.models.task import PrioritizedTask, Task
+from app.domain.models.task_step import EnhancedChecklistResponse, StepDifficulty, TaskStep
 
 
 def _get_task_id(planned_task: PlannedTask) -> str:
@@ -277,3 +278,73 @@ class TestDayPlaningService:
         )
 
         assert plan.cognitive_balance == "balanced"
+
+    @pytest.mark.asyncio
+    async def test_estimate_task_uses_llm_when_available(self) -> None:
+        """Should use LLM enhanced estimation instead of local heuristics."""
+        mock_llm = AsyncMock()
+        mock_llm.generate_enhanced_checklist.return_value = EnhancedChecklistResponse(
+            summary="summary",
+            deliverable="deliverable",
+            steps=[
+                TaskStep(
+                    description="Read rubric",
+                    estimated_minutes=20,
+                    difficulty=StepDifficulty.EASY,
+                    is_minimal_first_step=True,
+                ),
+                TaskStep(
+                    description="Write answer",
+                    estimated_minutes=70,
+                    difficulty=StepDifficulty.HARD,
+                    is_minimal_first_step=False,
+                ),
+            ],
+            warnings=[],
+            questions_to_clarify=[],
+            final_checklist=[],
+        )
+
+        service = DayPlaningService(llm_client=mock_llm)
+
+        task = Task(
+            id="task-llm",
+            course_name="Test",
+            title="LLM task",
+            description_text="Review quickly",
+            status=TaskStatus.PENDING,
+            url="http://example.com",
+        )
+        prioritized_task = PrioritizedTask(task=task, priority=TaskPriority.HIGH)
+
+        estimated = await service._estimate_task(prioritized_task)
+
+        assert estimated.estimated_minutes == 90
+        assert estimated.difficulty == TaskDifficulty.HARD
+        assert estimated.cognitive_load == CognitiveLoad.HEAVY
+        mock_llm.generate_enhanced_checklist.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_estimate_task_fallbacks_when_llm_fails(self) -> None:
+        """Should fallback to local heuristics if LLM estimation fails."""
+        mock_llm = AsyncMock()
+        mock_llm.generate_enhanced_checklist.side_effect = RuntimeError("provider down")
+
+        service = DayPlaningService(llm_client=mock_llm)
+
+        task = Task(
+            id="task-fallback",
+            course_name="Test",
+            title="Fallback task",
+            description_text="Review the requirements",
+            status=TaskStatus.PENDING,
+            url="http://example.com",
+        )
+        prioritized_task = PrioritizedTask(task=task, priority=TaskPriority.HIGH)
+
+        estimated = await service._estimate_task(prioritized_task)
+
+        # "review" is short heuristic path when fallback is used.
+        assert estimated.estimated_minutes == 30
+        assert estimated.difficulty in {TaskDifficulty.EASY, TaskDifficulty.MODERATE}
+        mock_llm.generate_enhanced_checklist.assert_awaited_once()

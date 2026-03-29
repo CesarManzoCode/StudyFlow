@@ -2,7 +2,7 @@
   "task-123": {
     "task_id": "task-123",
     "created_at": "2026-03-29T00:08:16.889108",
-    "updated_at": "2026-03-29T00:51:23.026786",
+    "updated_at": "2026-03-29T01:02:39.658916",
     "checklist": [
       {
         "text": "Only one",
@@ -293,6 +293,27 @@
       {
         "interaction_id": "ai-001",
         "timestamp": "2026-03-29T00:51:23.025077",
+        "question": "How to approach this?",
+        "response": "Here are the steps...",
+        "metadata": {}
+      },
+      {
+        "interaction_id": "ai-001",
+        "timestamp": "2026-03-29T00:58:09.775192",
+        "question": "How to approach this?",
+        "response": "Here are the steps...",
+        "metadata": {}
+      },
+      {
+        "interaction_id": "ai-001",
+        "timestamp": "2026-03-29T00:58:15.882910",
+        "question": "How to approach this?",
+        "response": "Here are the steps...",
+        "metadata": {}
+      },
+      {
+        "interaction_id": "ai-001",
+        "timestamp": "2026-03-29T01:02:39.657523",
         "question": "How to approach this?",
         "response": "Here are the steps...",
         "metadata": {}
@@ -1470,6 +1491,228 @@
       {
         "interaction_id": "ai-001",
         "timestamp": "2026-03-29T00:51:23.108016",
+        "question": "How should I structure this?",
+        "response": "Use the following structure...",
+        "metadata": {}
+      }
+    ]
+  },
+  "task-c4f8e339": {
+    "task_id": "task-c4f8e339",
+    "created_at": "2026-03-29T00:58:09.789381",
+    "updated_at": "2026-03-29T00:58:09.796933",
+    "checklist": [],
+    "notes": "",
+    "ai_interactions": [
+      {
+        "interaction_id": "ai-001",
+        "timestamp": "2026-03-29T00:58:09.789087",
+        "question": "Q1?",
+        "response": "A1",
+        "metadata": {}
+      },
+      {
+        "interaction_id": "ai-002",
+        "timestamp": "2026-03-29T00:58:09.796635",
+        "question": "Q2?",
+        "response": "A2",
+        "metadata": {}
+      }
+    ]
+  },
+  "task-66b984ad": {
+    "task_id": "task-66b984ad",
+    "created_at": "2026-03-29T00:58:09.815183",
+    "updated_at": "2026-03-29T00:58:09.815186",
+    "checklist": [],
+    "notes": "",
+    "ai_interactions": [
+      {
+        "interaction_id": "ai-001",
+        "timestamp": "2026-03-29T00:58:09.814879",
+        "question": "Help?",
+        "response": null,
+        "metadata": {
+          "model": "gpt-4",
+          "tokens_used": 150
+        }
+      }
+    ]
+  },
+  "task-7b5dc840": {
+    "task_id": "task-7b5dc840",
+    "created_at": "2026-03-29T00:58:09.833465",
+    "updated_at": "2026-03-29T00:58:09.856366",
+    "checklist": [
+      {
+        "text": "Read requirements",
+        "completed": true,
+        "completed_at": "2026-03-29T00:58:09.848692"
+      },
+      {
+        "text": "Write outline",
+        "completed": false,
+        "completed_at": null
+      },
+      {
+        "text": "Draft content",
+        "completed": false,
+        "completed_at": null
+      }
+    ],
+    "notes": "Start working on assignment",
+    "ai_interactions": [
+      {
+        "interaction_id": "ai-001",
+        "timestamp": "2026-03-29T00:58:09.856084",
+        "question": "How should I structure this?",
+        "response": "Use the following structure...",
+        "metadata": {}
+      }
+    ]
+  },
+  "task-729a2365": {
+    "task_id": "task-729a2365",
+    "created_at": "2026-03-29T00:58:15.902510",
+    "updated_at": "2026-03-29T00:58:15.916036",
+    "checklist": [],
+    "notes": "",
+    "ai_interactions": [
+      {
+        "interaction_id": "ai-001",
+        "timestamp": "2026-03-29T00:58:15.901827",
+        "question": "Q1?",
+        "response": "A1",
+        "metadata": {}
+      },
+      {
+        "interaction_id": "ai-002",
+        "timestamp": "2026-03-29T00:58:15.915306",
+        "question": "Q2?",
+        "response": "A2",
+        "metadata": {}
+      }
+    ]
+  },
+  "task-98db1826": {
+    "task_id": "task-98db1826",
+    "created_at": "2026-03-29T00:58:15.943558",
+    "updated_at": "2026-03-29T00:58:15.943560",
+    "checklist": [],
+    "notes": "",
+    "ai_interactions": [
+      {
+        "interaction_id": "ai-001",
+        "timestamp": "2026-03-29T00:58:15.943011",
+        "question": "Help?",
+        "response": null,
+        "metadata": {
+          "model": "gpt-4",
+          "tokens_used": 150
+        }
+      }
+    ]
+  },
+  "task-a68b2a75": {
+    "task_id": "task-a68b2a75",
+    "created_at": "2026-03-29T00:58:15.977852",
+    "updated_at": "2026-03-29T00:58:16.008340",
+    "checklist": [
+      {
+        "text": "Read requirements",
+        "completed": true,
+        "completed_at": "2026-03-29T00:58:15.999281"
+      },
+      {
+        "text": "Write outline",
+        "completed": false,
+        "completed_at": null
+      },
+      {
+        "text": "Draft content",
+        "completed": false,
+        "completed_at": null
+      }
+    ],
+    "notes": "Start working on assignment",
+    "ai_interactions": [
+      {
+        "interaction_id": "ai-001",
+        "timestamp": "2026-03-29T00:58:16.007997",
+        "question": "How should I structure this?",
+        "response": "Use the following structure...",
+        "metadata": {}
+      }
+    ]
+  },
+  "task-ed7fa899": {
+    "task_id": "task-ed7fa899",
+    "created_at": "2026-03-29T01:02:39.670628",
+    "updated_at": "2026-03-29T01:02:39.678228",
+    "checklist": [],
+    "notes": "",
+    "ai_interactions": [
+      {
+        "interaction_id": "ai-001",
+        "timestamp": "2026-03-29T01:02:39.670338",
+        "question": "Q1?",
+        "response": "A1",
+        "metadata": {}
+      },
+      {
+        "interaction_id": "ai-002",
+        "timestamp": "2026-03-29T01:02:39.677941",
+        "question": "Q2?",
+        "response": "A2",
+        "metadata": {}
+      }
+    ]
+  },
+  "task-bc6dc8fa": {
+    "task_id": "task-bc6dc8fa",
+    "created_at": "2026-03-29T01:02:39.695866",
+    "updated_at": "2026-03-29T01:02:39.695869",
+    "checklist": [],
+    "notes": "",
+    "ai_interactions": [
+      {
+        "interaction_id": "ai-001",
+        "timestamp": "2026-03-29T01:02:39.695564",
+        "question": "Help?",
+        "response": null,
+        "metadata": {
+          "model": "gpt-4",
+          "tokens_used": 150
+        }
+      }
+    ]
+  },
+  "task-fd1af729": {
+    "task_id": "task-fd1af729",
+    "created_at": "2026-03-29T01:02:39.713567",
+    "updated_at": "2026-03-29T01:02:39.736283",
+    "checklist": [
+      {
+        "text": "Read requirements",
+        "completed": true,
+        "completed_at": "2026-03-29T01:02:39.728543"
+      },
+      {
+        "text": "Write outline",
+        "completed": false,
+        "completed_at": null
+      },
+      {
+        "text": "Draft content",
+        "completed": false,
+        "completed_at": null
+      }
+    ],
+    "notes": "Start working on assignment",
+    "ai_interactions": [
+      {
+        "interaction_id": "ai-001",
+        "timestamp": "2026-03-29T01:02:39.735982",
         "question": "How should I structure this?",
         "response": "Use the following structure...",
         "metadata": {}

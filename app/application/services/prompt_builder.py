@@ -16,6 +16,8 @@ class PromptBuilder:
         self,
         task: Task,
         user_question: str | None = None,
+        *,
+        include_step_metadata: bool = False,
     ) -> str:
         """
         Build the prompt used to request clear actionable help for a selected
@@ -32,7 +34,7 @@ class PromptBuilder:
 
         sections = [
             self._build_role_section(),
-            self._build_output_contract_section(),
+            self._build_output_contract_section(include_step_metadata=include_step_metadata),
             self._build_task_context_section(task),
             self._build_user_request_section(normalized_question),
             self._build_behavior_rules_section(),
@@ -54,7 +56,23 @@ class PromptBuilder:
             "done and how to approach the task in a clear, practical way."
         )
 
-    def _build_output_contract_section(self) -> str:
+    def _build_output_contract_section(self, *, include_step_metadata: bool) -> str:
+        if include_step_metadata:
+            return (
+                "Return your answer as structured content with the following sections:\n"
+                "1. Summary\n"
+                "2. Deliverable\n"
+                "3. Steps with metadata\n"
+                "4. Warnings\n"
+                "5. Questions to clarify\n"
+                "6. Final checklist\n\n"
+                "For each step, include:\n"
+                "- description\n"
+                "- estimated_minutes (integer 1 to 120)\n"
+                "- difficulty (trivial|easy|moderate|hard)\n"
+                "- is_minimal_first_step (true for only one step, ideally the first concrete action)"
+            )
+
         return (
             "Return your answer as structured content with the following sections:\n"
             "1. Summary\n"

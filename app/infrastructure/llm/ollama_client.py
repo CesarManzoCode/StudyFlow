@@ -7,8 +7,13 @@ import httpx
 from app.domain.exceptions import InvalidLlmResponseError, LlmProviderError
 from app.domain.models.checklist import ChecklistResponse
 from app.domain.models.task import Task
+from app.domain.models.task_step import EnhancedChecklistResponse
 from app.domain.ports.llm_client import LlmClient
-from app.infrastructure.llm.schemas import ChecklistPayload
+from app.infrastructure.llm.schemas import (
+    ChecklistPayload,
+    EnhancedChecklistPayload,
+    fallback_enhanced_from_checklist,
+)
 
 
 class OllamaClient(LlmClient):
@@ -108,6 +113,31 @@ class OllamaClient(LlmClient):
 
         return validated_payload.to_domain()
 
+    async def generate_enhanced_checklist(
+        self,
+        task: Task,
+        user_question: str | None = None,
+    ) -> EnhancedChecklistResponse:
+        """Generate checklist with LLM-provided step metadata."""
+        prompt = self._build_prompt(task=task, user_question=user_question)
+        payload = self._build_request_payload(prompt=prompt, enhanced=True)
+
+        try:
+            async with httpx.AsyncClient(
+                base_url=self._base_url,
+                timeout=self._timeout_seconds,
+            ) as client:
+                response = await client.post("/api/chat", json=payload)
+
+            response.raise_for_status()
+            response_data = response.json()
+            content = self._extract_message_content(response_data)
+            validated_payload = EnhancedChecklistPayload.model_validate_json(content)
+            return validated_payload.to_domain()
+        except Exception:
+            checklist = await self.generate_checklist(task=task, user_question=user_question)
+            return fallback_enhanced_from_checklist(checklist)
+
     def _build_prompt(self, *, task: Task, user_question: str | None) -> str:
         normalized_question = (user_question or "").strip()
         if normalized_question:
@@ -132,7 +162,13 @@ class OllamaClient(LlmClient):
             "step-by-step checklist to complete the task."
         )
 
-    def _build_request_payload(self, *, prompt: str) -> dict[str, object]:
+    def _build_request_payload(self, *, prompt: str, enhanced: bool = False) -> dict[str, object]:
+        response_schema = (
+            EnhancedChecklistPayload.model_json_schema()
+            if enhanced
+            else ChecklistPayload.model_json_schema()
+        )
+
         return {
             "model": self._model,
             "stream": False,
@@ -143,7 +179,7 @@ class OllamaClient(LlmClient):
                     "content": prompt,
                 }
             ],
-            "format": ChecklistPayload.model_json_schema(),
+            "format": response_schema,
             "options": {
                 "temperature": self._temperature,
             },

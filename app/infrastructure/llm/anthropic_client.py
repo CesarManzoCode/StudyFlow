@@ -13,8 +13,13 @@ from anthropic import (
 from app.domain.exceptions import InvalidLlmResponseError, LlmProviderError
 from app.domain.models.checklist import ChecklistResponse
 from app.domain.models.task import Task
+from app.domain.models.task_step import EnhancedChecklistResponse
 from app.domain.ports.llm_client import LlmClient
-from app.infrastructure.llm.schemas import ChecklistPayload
+from app.infrastructure.llm.schemas import (
+    ChecklistPayload,
+    EnhancedChecklistPayload,
+    fallback_enhanced_from_checklist,
+)
 
 
 class AnthropicClient(LlmClient):
@@ -132,8 +137,61 @@ class AnthropicClient(LlmClient):
 
         return validated_payload.to_domain()
 
+    async def generate_enhanced_checklist(
+        self,
+        task: Task,
+        user_question: str | None = None,
+    ) -> EnhancedChecklistResponse:
+        """Generate checklist with LLM-provided step metadata."""
+        system_prompt = self._build_system_prompt_enhanced()
+        user_prompt = self._build_user_prompt(task=task, user_question=user_question)
+
+        try:
+            response = await self._client.messages.create(
+                model=self._model,
+                max_tokens=self._max_tokens,
+                temperature=self._temperature,
+                system=system_prompt,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": user_prompt,
+                    }
+                ],
+            )
+        except Exception:
+            checklist = await self.generate_checklist(task=task, user_question=user_question)
+            return fallback_enhanced_from_checklist(checklist)
+
+        content = self._extract_text_content(response)
+
+        try:
+            parsed_json = json.loads(content)
+            validated_payload = EnhancedChecklistPayload.model_validate(parsed_json)
+        except Exception:
+            checklist = await self.generate_checklist(task=task, user_question=user_question)
+            return fallback_enhanced_from_checklist(checklist)
+
+        return validated_payload.to_domain()
+
     def _build_system_prompt(self) -> str:
         schema_json = json.dumps(ChecklistPayload.model_json_schema(), ensure_ascii=False, indent=2)
+
+        return (
+            "You are an academic task assistant.\n"
+            "You must respond with valid JSON only.\n"
+            "Do not include markdown fences.\n"
+            "Do not include explanations before or after the JSON.\n"
+            "The JSON must conform to this schema:\n"
+            f"{schema_json}"
+        )
+
+    def _build_system_prompt_enhanced(self) -> str:
+        schema_json = json.dumps(
+            EnhancedChecklistPayload.model_json_schema(),
+            ensure_ascii=False,
+            indent=2,
+        )
 
         return (
             "You are an academic task assistant.\n"

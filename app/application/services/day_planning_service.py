@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import logging
 
 from app.domain.enums import TaskPriority
 from app.domain.models.day_plan import (
@@ -9,7 +10,11 @@ from app.domain.models.day_plan import (
     TaskDifficulty,
 )
 from app.domain.models.task import PrioritizedTask, Task
+from app.domain.models.task_step import StepDifficulty, TaskStep
 from app.domain.ports.llm_client import LlmClient
+
+
+logger = logging.getLogger(__name__)
 
 
 class DayPlaningService:
@@ -78,11 +83,16 @@ class DayPlaningService:
         Estimate time, size, difficulty, and cognitive load for a task.
         """
         task = prioritized_task.task
-        
-        # Start with reasonable defaults
-        estimated_minutes = self._estimate_minutes_from_description(task.description_text or "")
-        difficulty = self._infer_difficulty_from_description(task.description_text or "")
-        cognitive_load = self._infer_cognitive_load(difficulty)
+
+        llm_estimation = await self._estimate_from_llm(task)
+        if llm_estimation is not None:
+            estimated_minutes, difficulty = llm_estimation
+            cognitive_load = self._infer_cognitive_load(difficulty)
+        else:
+            # Start with reasonable defaults when LLM estimation is unavailable.
+            estimated_minutes = self._estimate_minutes_from_description(task.description_text or "")
+            difficulty = self._infer_difficulty_from_description(task.description_text or "")
+            cognitive_load = self._infer_cognitive_load(difficulty)
 
         size = self._minutes_to_size(estimated_minutes)
 
@@ -93,6 +103,50 @@ class DayPlaningService:
             difficulty=difficulty,
             cognitive_load=cognitive_load,
         )
+
+    async def _estimate_from_llm(
+        self,
+        task: Task,
+    ) -> tuple[int, TaskDifficulty] | None:
+        """
+        Try to estimate task effort from the LLM enhanced checklist output.
+
+        Returns None when provider data is unavailable so caller can fallback
+        to deterministic local heuristics.
+        """
+        if self._llm_client is None:
+            return None
+
+        try:
+            enhanced = await self._llm_client.generate_enhanced_checklist(task=task)
+        except Exception as exc:
+            logger.warning("LLM estimation failed for task %s: %s", task.id, exc)
+            return None
+
+        if not enhanced.steps:
+            return None
+
+        raw_minutes = sum(step.estimated_minutes for step in enhanced.steps)
+        clamped_minutes = max(15, min(240, raw_minutes))
+
+        mapped_difficulty = self._map_step_difficulties_to_task(enhanced.steps)
+        return clamped_minutes, mapped_difficulty
+
+    def _map_step_difficulties_to_task(self, steps: list[TaskStep]) -> TaskDifficulty:
+        """Map max step difficulty to task-level difficulty."""
+        level_map = {
+            StepDifficulty.TRIVIAL: 0,
+            StepDifficulty.EASY: 1,
+            StepDifficulty.MODERATE: 2,
+            StepDifficulty.HARD: 3,
+        }
+        max_level = max((level_map.get(step.difficulty, 2) for step in steps), default=2)
+
+        if max_level >= 3:
+            return TaskDifficulty.HARD
+        if max_level <= 1:
+            return TaskDifficulty.EASY
+        return TaskDifficulty.MODERATE
 
     def _estimate_minutes_from_description(self, description: str) -> int:
         """

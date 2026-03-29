@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
+from app.application.services.day_planning_service import DayPlaningService
 from app.application.services.prompt_builder import PromptBuilder
 from app.application.services.task_priority_service import TaskPriorityService
 from app.application.use_cases.generate_task_help import GenerateTaskHelpUseCase
@@ -16,6 +17,7 @@ from app.application.use_cases.manage_task_state import (
     UpdateTaskChecklistUseCase,
     UpdateTaskNotesUseCase,
 )
+from app.application.use_cases.plan_day import PlanDayUseCase
 from app.application.use_cases.save_settings import SaveSettingsUseCase
 from app.application.use_cases.sync_tasks import SyncTasksUseCase
 from app.application.use_cases.validate_provider import ValidateProviderUseCase
@@ -59,6 +61,7 @@ class AppContainer:
 
     # services
     task_priority_service: TaskPriorityService
+    day_planning_service: DayPlaningService
     prompt_builder: PromptBuilder
 
     # use cases - tasks
@@ -66,6 +69,7 @@ class AppContainer:
     get_task_detail: GetTaskDetailUseCase
     sync_tasks: SyncTasksUseCase
     generate_task_help: GenerateTaskHelpUseCase
+    plan_day: PlanDayUseCase
     save_settings: SaveSettingsUseCase
     validate_provider: ValidateProviderUseCase
 
@@ -105,6 +109,7 @@ def build_app_container(settings: Settings | None = None) -> AppContainer:
     # Services
     # ---------------------------
     task_priority_service = TaskPriorityService()
+    day_planning_service = DayPlaningService(llm_client=llm_client)
     prompt_builder = PromptBuilder(llm_language=resolved_settings.llm_language)
 
     # ---------------------------
@@ -129,6 +134,12 @@ def build_app_container(settings: Settings | None = None) -> AppContainer:
         moodle_client=moodle_client,
         llm_client=llm_client,
         prompt_builder=prompt_builder,
+    )
+
+    plan_day = PlanDayUseCase(
+        task_repository=task_repository,
+        task_priority_service=task_priority_service,
+        day_planning_service=day_planning_service,
     )
 
     save_settings = SaveSettingsUseCase()
@@ -156,11 +167,13 @@ def build_app_container(settings: Settings | None = None) -> AppContainer:
         moodle_client=moodle_client,
         llm_client=llm_client,
         task_priority_service=task_priority_service,
+        day_planning_service=day_planning_service,
         prompt_builder=prompt_builder,
         list_tasks=list_tasks,
         get_task_detail=get_task_detail,
         sync_tasks=sync_tasks,
         generate_task_help=generate_task_help,
+        plan_day=plan_day,
         save_settings=save_settings,
         validate_provider=validate_provider,
         get_task_state=get_task_state,

@@ -1,0 +1,193 @@
+<div id="day-plan-container" class="day-plan-container">
+  <div id="day-plan-loading" style="display: none;">
+    <p class="helper-text">Generating your day plan...</p>
+  </div>
+
+  <div id="day-plan-error" style="display: none;" class="alert alert--error">
+    <p id="day-plan-error-message"></p>
+  </div>
+
+  <div id="day-plan-result" style="display: none;">
+    <div class="stack">
+      <!-- Header with summary stats -->
+      <div class="day-plan-summary">
+        <div class="summary-stat">
+          <span class="summary-stat__label">Total time</span>
+          <span class="summary-stat__value" id="plan-total-hours">0h</span>
+        </div>
+        <div class="summary-stat">
+          <span class="summary-stat__label">Tasks</span>
+          <span class="summary-stat__value" id="plan-task-count">0</span>
+        </div>
+        <div class="summary-stat">
+          <span class="summary-stat__label">Feasible</span>
+          <span class="summary-stat__value" id="plan-feasible">✓</span>
+        </div>
+        <div class="summary-stat">
+          <span class="summary-stat__label">Balance</span>
+          <span class="summary-stat__value" id="plan-balance">balanced</span>
+        </div>
+      </div>
+
+      <!-- Planned tasks list -->
+      <div id="planned-tasks" class="planned-tasks">
+        <!-- Tasks will be inserted here -->
+      </div>
+
+      <!-- No tasks message -->
+      <div id="no-tasks-message" style="display: none;">
+        <p class="helper-text">All clear! No critical/high-priority tasks for today.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .day-plan-container {
+    margin: 0;
+  }
+
+  .day-plan-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--color-surface-secondary, #f5f5f5);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .summary-stat__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--color-text-secondary, #666);
+    margin-bottom: 0.25rem;
+  }
+
+  .summary-stat__value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-primary, #333);
+  }
+
+  .planned-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .planned-task {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: var(--color-surface, #fff);
+    border: 1px solid var(--color-border, #e0e0e0);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .planned-task:hover {
+    border-color: var(--color-primary, #0066cc);
+    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.1);
+  }
+
+  .task-sequence {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-primary, #0066cc);
+    color: white;
+    font-weight: 700;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+  }
+
+  .task-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .task-title {
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+    color: var(--color-text-primary, #333);
+  }
+
+  .task-course {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary, #666);
+    margin: 0 0 0.5rem 0;
+  }
+
+  .task-meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    font-size: 0.75rem;
+  }
+
+  .task-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background: var(--color-surface-secondary, #f0f0f0);
+    color: var(--color-text-secondary, #666);
+    font-weight: 500;
+  }
+
+  .task-badge--time {
+    background: #e3f2fd;
+    color: #0066cc;
+  }
+
+  .task-badge--difficulty-easy {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .task-badge--difficulty-moderate {
+    background: #fff3e0;
+    color: #e65100;
+  }
+
+  .task-badge--difficulty-hard {
+    background: #ffebee;
+    color: #c62828;
+  }
+
+  .task-badge--load-light {
+    background: #f3e5f5;
+    color: #6a1b9a;
+  }
+
+  .task-badge--load-moderate {
+    background: #fff3e0;
+    color: #e65100;
+  }
+
+  .task-badge--load-heavy {
+    background: #ffebee;
+    color: #c62828;
+  }
+
+  .alert--error {
+    background: #ffebee;
+    border: 1px solid #ef5350;
+    color: #c62828;
+    padding: 1rem;
+    border-radius: 6px;
+  }
+</style>

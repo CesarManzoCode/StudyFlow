@@ -50,16 +50,29 @@
           </div>
 
           <div>
-            <h3>Steps</h3>
-            {% if checklist.steps %}
-              <ul>
-                {% for step in checklist.steps %}
-                  <li>{{ step }}</li>
-                {% endfor %}
-              </ul>
-            {% else %}
-              <p class="helper-text">No step list was generated.</p>
-            {% endif %}
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+              <h3 style="margin: 0;">Steps</h3>
+              <button 
+                type="button"
+                class="button button--secondary"
+                onclick="loadEnhancedSteps()"
+                style="margin: 0;"
+              >
+                Load with estimates
+              </button>
+            </div>
+            
+            <div id="steps-container">
+              {% if checklist.steps %}
+                <ul>
+                  {% for step in checklist.steps %}
+                    <li>{{ step }}</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="helper-text">No step list was generated.</p>
+              {% endif %}
+            </div>
           </div>
 
           {% if checklist.warnings %}

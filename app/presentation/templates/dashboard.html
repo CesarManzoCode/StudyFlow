@@ -19,6 +19,30 @@
   {% include "partials/alerts.html" %}
 
   <section class="page-section dashboard-grid">
+    <article class="card">
+      <div class="card__header">
+        <div>
+          <p class="card__eyebrow">Intelligent Planning</p>
+          <h2 class="card__title">¿Qué debería hacer hoy?</h2>
+        </div>
+      </div>
+
+      <p class="card__description">
+        Get an AI-optimized schedule with smart time estimation and cognitive load balancing.
+      </p>
+
+      <button
+        type="button"
+        class="button button--primary"
+        onclick="generateDayPlan()"
+        style="margin-bottom: 1rem;"
+      >
+        Generate day plan
+      </button>
+
+      {% include "partials/day_plan.html" %}
+    </article>
+
     <article class="card card--compact">
       <div class="card__header">
         <div>

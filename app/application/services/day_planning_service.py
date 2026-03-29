@@ -41,17 +41,17 @@ class DayPlaningService:
         Returns:
             DayPlan with ordered task sequence
         """
-        # Filter to tasks that should be done today (critical + high priority)
+        # Filter to tasks that should be done today (critical + high + medium priority)
         today_candidates = [
             pt for pt in prioritized_tasks
-            if pt.priority in {TaskPriority.CRITICAL, TaskPriority.HIGH}
+            if pt.priority in {TaskPriority.CRITICAL, TaskPriority.HIGH, TaskPriority.MEDIUM}
         ]
 
         # Estimate time and difficulty for each candidate
         estimated_tasks = []
         for prioritized_task in today_candidates:
             estimated_tasks.append(
-                await self._estimate_task(prioritized_task.task)
+                await self._estimate_task(prioritized_task)
             )
 
         # Sort by priority + deadline, then apply cognitive pacing
@@ -73,10 +73,12 @@ class DayPlaningService:
 
         return plan
 
-    async def _estimate_task(self, task: Task) -> PlannedTask:
+    async def _estimate_task(self, prioritized_task: PrioritizedTask) -> PlannedTask:
         """
         Estimate time, size, difficulty, and cognitive load for a task.
         """
+        task = prioritized_task.task
+        
         # Start with reasonable defaults
         estimated_minutes = self._estimate_minutes_from_description(task.description_text or "")
         difficulty = self._infer_difficulty_from_description(task.description_text or "")
@@ -85,8 +87,7 @@ class DayPlaningService:
         size = self._minutes_to_size(estimated_minutes)
 
         return PlannedTask(
-            task=task,
-            priority=task.status,  # type: ignore
+            task=prioritized_task,
             estimated_minutes=estimated_minutes,
             size=size,
             difficulty=difficulty,
@@ -151,9 +152,9 @@ class DayPlaningService:
 
     def _minutes_to_size(self, minutes: int) -> EstimatedTaskSize:
         """Convert minutes to EstimatedTaskSize category."""
-        if minutes < 30:
+        if minutes <= 30:
             return EstimatedTaskSize.SHORT
-        elif minutes > 90:
+        elif minutes >= 90:
             return EstimatedTaskSize.LONG
         else:
             return EstimatedTaskSize.MEDIUM
@@ -169,19 +170,45 @@ class DayPlaningService:
         2. Alternate HEAVY/LIGHT cognitive loads for better endurance
         3. Place MEDIUM/HIGH priority tasks
         """
-        critical_tasks = [t for t in tasks if t.priority == TaskPriority.CRITICAL]
-        high_tasks = [t for t in tasks if t.priority == TaskPriority.HIGH]
+        def get_priority(planned_task: PlannedTask) -> TaskPriority:
+            """Extract priority from PlannedTask."""
+            if isinstance(planned_task.task, PrioritizedTask):
+                return planned_task.task.priority
+            # For regular Task, use NONE as default
+            return TaskPriority.NONE
+        
+        def get_task_id(planned_task: PlannedTask) -> str:
+            """Extract task ID from PlannedTask."""
+            if isinstance(planned_task.task, PrioritizedTask):
+                return planned_task.task.task.id
+            return planned_task.task.id
+        
+        def get_due_at(planned_task: PlannedTask):
+            """Extract due_at from PlannedTask."""
+            if isinstance(planned_task.task, PrioritizedTask):
+                return planned_task.task.task.due_at or datetime.max
+            return planned_task.task.due_at or datetime.max
+        
+        critical_tasks = [t for t in tasks if get_priority(t) == TaskPriority.CRITICAL]
+        high_tasks = [t for t in tasks if get_priority(t) == TaskPriority.HIGH]
+        medium_tasks = [t for t in tasks if get_priority(t) == TaskPriority.MEDIUM]
 
         # Sort each group by deadline
         critical_tasks.sort(
             key=lambda t: (
-                t.task.due_at or datetime.max,
+                get_due_at(t),
                 t.difficulty.value,
             )
         )
         high_tasks.sort(
             key=lambda t: (
-                t.task.due_at or datetime.max,
+                get_due_at(t),
+                t.difficulty.value,
+            )
+        )
+        medium_tasks.sort(
+            key=lambda t: (
+                get_due_at(t),
                 t.difficulty.value,
             )
         )
@@ -190,7 +217,7 @@ class DayPlaningService:
         result = []
         last_load = None
 
-        for task in critical_tasks + high_tasks:
+        for task in critical_tasks + high_tasks + medium_tasks:
             # If last task was heavy, try to pick a light one
             if last_load == CognitiveLoad.HEAVY and any(
                 t.cognitive_load == CognitiveLoad.LIGHT and t not in result
@@ -211,9 +238,10 @@ class DayPlaningService:
         seen = set()
         unique_result = []
         for task in result:
-            if task.task.id not in seen:
+            task_id = get_task_id(task)
+            if task_id not in seen:
                 unique_result.append(task)
-                seen.add(task.task.id)
+                seen.add(task_id)
 
         return unique_result
 

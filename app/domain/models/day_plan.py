@@ -1,13 +1,13 @@
 from datetime import datetime, timedelta
+from enum import Enum
 from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.domain.enums import TaskPriority
-from app.domain.models.task import Task
+from app.domain.models.task import PrioritizedTask, Task
 
 
-class EstimatedTaskSize(str):
+class EstimatedTaskSize(str, Enum):
     """Enum for estimated task sizes."""
 
     SHORT = "short"  # < 30 min
@@ -15,7 +15,7 @@ class EstimatedTaskSize(str):
     LONG = "long"  # > 90 min
 
 
-class TaskDifficulty(str):
+class TaskDifficulty(str, Enum):
     """Enum for estimated task difficulty."""
 
     EASY = "easy"
@@ -23,7 +23,7 @@ class TaskDifficulty(str):
     HARD = "hard"
 
 
-class CognitiveLoad(str):
+class CognitiveLoad(str, Enum):
     """Enum for cognitive load level."""
 
     LIGHT = "light"  # Routine, familiar work
@@ -41,8 +41,7 @@ class PlannedTask(BaseModel):
         str_strip_whitespace=True,
     )
 
-    task: Task
-    priority: TaskPriority
+    task: PrioritizedTask | Task
 
     # Time estimation
     estimated_minutes: int = Field(..., ge=15, le=240, description="Estimated time in minutes")
